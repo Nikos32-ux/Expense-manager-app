@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html,
+body {
+  background-color: #121212;
+  margin: 0;
+  padding: 0;
+}
+
+@keyframes modal {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+
+
+.openExpenseDetail {
+  animation: modal 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.fadeInParent {
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+
+@keyframes fadeInExpenseUpdateSuccess {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+
+.input-amount::after{
+  content: "€";
+}
+
+.fadeInSuccess {
+  animation: fadeInExpenseUpdateSuccess 1s ease-in-out forwards;
+}
+
+@media (min-height:800px) {
+
+  .input-container{
+    padding: 20px;
+  }
+
+  .input input{
+    height: 60px;
+  }
+
+    .input input::placeholder{
+      font-size: 22px;
+    }
+
+
+
+  .icon{
+      height: 2rem !important;
+    }
+
+    .login-button button{
+      padding: 14px;
+     
+    }
+
+    .login-button p{
+       font-size: 1.3rem;
+    }
+
+    .login-heading-top{
+      height: 50vh;
+    }
+
+  .wp-heading{
+    margin-top: 40px;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .wp-heading h1{
+    width: 100%;
+      font-size: 30px;
+  }
+
+  .wp-buttons{
+    padding: 3rem;
+    width: 100%;
+  }
+
+  .button{
+    padding: 20px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+
+
+  .transactions-top-part{
+    height: 450px;
+    background-color: red;
+    padding: 20px;
+  }
+
+  .transactions-header-content{
+    margin-top: 20px;
+    padding-top: 50px;
+  }
+
+  .transactions-header-content h1{
+    font-size: 30px;
+    padding-bottom: 6px;
+  }
+
+
+  .register-top{
+    min-height: 450px;
+  }
+
+  .register-top p{
+    font-size: 2.2rem;
+    padding-top: 30px;
+  }
+
+  .register-bottom{
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(16px);
+  }
+
+  .register-heading h1{
+    font-size: 1.9rem;
+    padding-top: 10px;
+  }
+
+  .register-form{
+    margin-top: 10px;
+  }
+
+  .register-form-input-container{
+    padding: 20px;
+  }
+
+  .register-submit-button button{
+    padding: 0.5rem;
+    font-size: 1.4rem;
+  }
+
+  .register-input{
+    height: 55px;
+  
+  }
+
+  .register-input input{
+    background-color: #111827;
+    height: 100%;
+    color: white;
+    font-size: 1.2rem;
+  }
+
+  .register-input .input::placeholder{
+    font-size: 1rem;
+  }
+}

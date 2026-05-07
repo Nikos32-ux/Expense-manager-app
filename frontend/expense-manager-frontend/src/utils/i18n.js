@@ -1,0 +1,138 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+
+const resources = {
+  en: {
+    translation: {
+      "profile": "Profile",
+      "username": "Username",
+      "email": "Email",
+      "language": "Language",
+      "update": "Update",
+      "account-info": "Account info",
+      "security": "Security",
+      "data-export": "Data Export",
+      "logout": "Logout",
+      "welcome-back": "Welcome back",
+      "delete-success": "Expense deleted successfully",
+      "total-balance": "Total balance",
+      "income": "Income",
+      "expenses": "Expenses",
+      "recent-transactions": "Recent transactions",
+      "view-all": "View all",
+      "dashboard": "Dashboard",
+      "categories": "Categories",
+      "sort": "Sort by",
+      "transactions": "Transactions",
+      "filter": "Filter by",
+      "apply": "Apply",
+      "zero-transactions": "No transactions yet",
+      "choose-filter-add-expense": "Try switching the filter (Day/Week/Month) or add a new expense!",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "categories-header": "Categories analysis",
+      "Housing": "Housing",
+      "Utilities": "Utilities",
+      "Groceries": "Groceries",
+      "Transportation": "Transportation",
+      "Healthcare": "Healthcare",
+      "Dining out": "Dining Out",
+      "Entertainment": "Entertainment",
+      "Shopping": "Shopping",
+      "Education": "Education",
+      "Personal care": "Personal Care",
+      "Subscriptions": "Subscriptions",
+      "Debt payments": "Debt Payments",
+      "Miscellaneous": "Miscellaneous",
+      "total-spent":"total Spent",
+      "password-must-match":"Passwords must match",
+      "something-went-wrong": "Something went wrong. Please try again.",
+      "password":"Password",
+      "updating":"Updating...",
+      "confirmPassword":"Password confirmation",
+      "security":"Security",
+      "FILE_GENERATED": "Report is ready!",
+      "notifications":"Notifications",
+      "no-new-alerts": "No new alerts",
+      "started-generating-report": "Report generation just begun, you will be notified once ready",
+      "failed-to-start-report": "Failed to start report generation",
+      "report-wait":"Please wait ...You will be notified",
+      "report-fresh-data": "Report already exists!"
+    }
+  },
+  el: {
+    translation: {
+      "profile": "Προφίλ",
+      "username": "Όνομα χρήστη",
+      "email": "Email",
+      "language": "Γλώσσα",
+      "update": "Ενημέρωση",
+      "account-info": "Πληροφορίες Προφίλ",
+      "security": "Προστασία λογαριασμού",
+      "data-export": "Εξαγωγή αρχείων",
+      "logout": "Αποσύνδεση",
+      "welcome-back": "Καλωσήρθες ",
+      "delete-success": "Διαγράφηκε επιτυχώς!",
+      "total-balance": "Σύνολο υπολοίπου",
+      "income": "Εισόδημα",
+      "expenses": "Έξοδα",
+      "recent-transactions": "Πρόσφατες συναλλαγές",
+      "view-all": "Προβολή όλων",
+      "dashboard": "Επισκόπηση",
+      "categories": "Κατηγοριες",
+      "transactions": "Συναλλαγες",
+      "sort": "Ταξινόμησε",
+      "filter": "Φίλτρο",
+      "apply": "Εφαρμογή",
+      "zero-transactions": "Καμία συναλλαγή",
+      "choose-filter-add-expense": "Πρόσθεσε καινούρια συναλλαγή 'η δοκίμασε κάποιο φίλτρο",
+      "day": "Ημέρα",
+      "week": "Εβδομάδα",
+      "month": "Μήνας",
+      "categories-header": "Ανάλυση κατηγοριών",
+      "Housing": "Στέγαση",
+      "Utilities": "Λογαριασμοί",
+      "Groceries": "Τρόφιμα",
+      "Transportation": "Μεταφορές",
+      "Healthcare": "Υγεία",
+      "Dining out": "Εστίαση",
+      "Entertainment": "Διασκέδαση",
+      "Shopping": "Αγορές",
+      "Education": "Εκπαίδευση",
+      "Personal care": "Προσωπική Φροντίδα",
+      "Subscriptions": "Συνδρομές",
+      "Debt payments": "Πληρωμές Χρεών",
+      "Miscellaneous": "Διάφορα",
+      "total-spent": "Σύνολο",
+      "password-must-match":"Οι κωδικοί πρέπει να ταιριάζουν",
+      "something-went-wrong":"Κάτι πήγε λάθος, παρακαλώ δοκιμάστε ξανά",
+      "password":"Κωδικός",
+      "updating":"Ενημερώνεται...",
+      "confirmPassword":"Επιβεβαίωση Κωδικου",
+      "security":"Aσφάλεια λογαριασμού",
+      "FILE_GENERATED": "Το αρχείο είναι έτοιμο",
+      "notifications":"Ειδοποιήσεις",
+      "no-new-alerts": "Δεν υπάρχουν νέες ειδοποιήσεις",
+      "started-generating-report": "Η δημιουργία του αρχείου ξεκίνησε, θα ειδοποιηθείτε με ενημέρωση",
+      "report-wait":"Παρακαλώ περιμένετε, θα ενημερωθείτε με ειδοποίηση",
+      "failed-to-start-report": "Αποτυχία έναρξης δημιουργίας αναφοράς",
+      "report-fresh-data": "Το αρχείο υπάρχει ήδη!"
+
+    }
+  }
+};
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: localStorage.getItem("lang") || "en",
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+export default i18n;

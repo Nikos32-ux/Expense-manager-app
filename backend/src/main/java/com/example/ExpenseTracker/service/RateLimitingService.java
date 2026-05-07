@@ -36,6 +36,7 @@ public class RateLimitingService {
         if (path.contains("/auth/login")) return new RateLimitingPolicy(5, 1,  Duration.ofMinutes(1));
         if (path.contains("/auth/user-verify")) {return new RateLimitingPolicy(5, 1, Duration.ofSeconds(10));}
         if (path.contains("/auth/register")) return new RateLimitingPolicy(4,1, Duration.ofMinutes(10));
+        if (path.contains("/report/generate-report")) return new RateLimitingPolicy(1, 1, Duration.ofMinutes(5));
         if (path.contains("/auth/update-account-info")) return new RateLimitingPolicy(10,1, Duration.ofMinutes(1));
         if (path.contains("/auth/update-password")) return new RateLimitingPolicy(3,1, Duration.ofMinutes(15));
         return new RateLimitingPolicy(50, 2,  Duration.ofSeconds(1));

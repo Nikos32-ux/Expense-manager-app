@@ -186,7 +186,10 @@ const Profile = () => {
               <LuShieldCheck size={24} className='text-blue-600' />
               <p className='text-lg font-medium text-gray-800'>{t("security")}</p>
             </Link>
-            <button onClick={() => exportFileMutate()} className='flex items-center bg-white gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
+            <button 
+              onClick={() => exportFileMutate()} 
+              disabled={exportFileisPending ? true : false}
+              className='flex items-center bg-white gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
               <LuFileUp size={24} className='text-blue-600' />
               <span className='text-lg font-medium text-gray-800'>
                 {t("data-export")}

@@ -1,0 +1,16 @@
+# backend
+backend/target/
+backend/*.log
+backend/.env
+backend/env.docker
+backend/.idea/
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env
+
+# general
+.vscode/
+.DS_Store

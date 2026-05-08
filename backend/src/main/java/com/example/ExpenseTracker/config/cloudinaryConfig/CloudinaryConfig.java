@@ -1,4 +1,4 @@
-package com.example.ExpenseTracker.cloudinaryConfig;
+package com.example.ExpenseTracker.config.cloudinaryConfig;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.example.ExpenseTracker.jwtConfig;
+package com.example.ExpenseTracker.config.jwtConfig;
 import com.example.ExpenseTracker.security.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

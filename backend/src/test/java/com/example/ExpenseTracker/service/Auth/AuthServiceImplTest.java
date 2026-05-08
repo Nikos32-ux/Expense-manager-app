@@ -1,7 +1,7 @@
 package com.example.ExpenseTracker.service.Auth;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.exception.*;
-import com.example.ExpenseTracker.jwtConfig.JwtUtils;
+import com.example.ExpenseTracker.config.jwtConfig.JwtUtils;
 import com.example.ExpenseTracker.model.RoleCategory;
 import com.example.ExpenseTracker.model.Roles;
 import com.example.ExpenseTracker.model.User;
@@ -28,7 +28,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package com.example.ExpenseTracker.jwtConfig;
+package com.example.ExpenseTracker.config.jwtConfig;
 import com.example.ExpenseTracker.service.JwtFilterService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

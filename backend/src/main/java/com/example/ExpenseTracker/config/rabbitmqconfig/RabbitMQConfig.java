@@ -1,4 +1,4 @@
-package com.example.ExpenseTracker.rabbitmqconfig;
+package com.example.ExpenseTracker.config.rabbitmqconfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;

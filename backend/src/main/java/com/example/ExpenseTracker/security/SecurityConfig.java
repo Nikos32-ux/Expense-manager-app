@@ -1,7 +1,7 @@
 package com.example.ExpenseTracker.security;
-import com.example.ExpenseTracker.jwtConfig.JwtEntryPoint;
-import com.example.ExpenseTracker.jwtConfig.JwtFilter;
-import com.example.ExpenseTracker.rateLimitingConfig.RateLimitingFilter;
+import com.example.ExpenseTracker.config.jwtConfig.JwtEntryPoint;
+import com.example.ExpenseTracker.config.jwtConfig.JwtFilter;
+import com.example.ExpenseTracker.config.rateLimitingConfig.RateLimitingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

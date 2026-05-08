@@ -1,12 +1,10 @@
 package com.example.ExpenseTracker.service.Auth;
-import com.example.ExpenseTracker.controller.AuthController;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.exception.InvalidAccountUpdateException;
 import com.example.ExpenseTracker.exception.UserNotFoundException;
-import com.example.ExpenseTracker.mapper.AuthLoginResMapper;
 import com.example.ExpenseTracker.security.UserPrincipal;
 import com.example.ExpenseTracker.exception.EmailAlreadyExistsException;
-import com.example.ExpenseTracker.jwtConfig.JwtUtils;
+import com.example.ExpenseTracker.config.jwtConfig.JwtUtils;
 import com.example.ExpenseTracker.mapper.AuthRegisterMapper;
 import com.example.ExpenseTracker.model.RoleCategory;
 import com.example.ExpenseTracker.model.Roles;
@@ -17,24 +15,19 @@ import com.example.ExpenseTracker.repository.UserRepository;
 import com.example.ExpenseTracker.service.CloudinaryService;
 import com.example.ExpenseTracker.service.TikaService;
 import com.example.ExpenseTracker.service.audit.AuditPublisher;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.tika.Tika;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import static java.time.LocalDateTime.now;
-import org.slf4j.Logger;
-import org.springframework.web.bind.annotation.*;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final RolesRepository rolesRepository;
     private final CloudinaryService cloudinaryService;
     private final TikaService tikaService;
-
+    private final LoadingCache<String, User> cache;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
@@ -130,6 +123,7 @@ public class AuthServiceImpl implements AuthService {
     public UpdateAccountResDTO changeAccountInfo(Long userId, UpdateAccountReqDTO updateAccount){
         User user = userRepository.findByEmailBasic(userId).orElseThrow(
                 () ->  new UserNotFoundException("user.not.found"));
+        String oldEmail = user.getEmail();
 
         if(!StringUtils.hasText(updateAccount.username()) &&
                 (!StringUtils.hasText(updateAccount.email()))){
@@ -143,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
         if(StringUtils.hasText(updateAccount.email())){
             user.setEmail(updateAccount.email());
         }
-
+        cache.invalidate(oldEmail);
         return new UpdateAccountResDTO(
                 user.getUsername(),
                 user.getEmail(),
@@ -158,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
         String convertedPassword = passwordEncoder.encode(updatePassword.password());
 
         user.setPassword(convertedPassword);
-
+        cache.invalidate(user.getEmail());
         return new UpdatePasswordResDTO(
                 "Updated password successfully",
                 user.getUsername(),

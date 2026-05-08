@@ -1,10 +1,9 @@
 package com.example.ExpenseTracker.service;
-import com.example.ExpenseTracker.jwtConfig.JwtUtils;
+import com.example.ExpenseTracker.config.jwtConfig.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

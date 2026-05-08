@@ -1,4 +1,4 @@
-package com.example.ExpenseTracker.jwtConfig;
+package com.example.ExpenseTracker.config.jwtConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

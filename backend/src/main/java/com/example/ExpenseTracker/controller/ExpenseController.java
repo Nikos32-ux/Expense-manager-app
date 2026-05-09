@@ -76,15 +76,16 @@ public class ExpenseController {
     }
 
 
-
-
     @GetMapping("categories-total")
     public ResponseEntity<List<CategoryTotalDTO>> categoriesTotal(
+            @Valid
             @ModelAttribute CategoryFilterDTO filterType
     ){
-        List<CategoryTotalDTO> listOfTotal = expenseService.estimateCategoryTotal(filterType);
+        Long userId = UserContextUtils.getAuthenticatedUser().getId();
+        List<CategoryTotalDTO> listOfTotal = expenseService.estimateCategoryTotal(filterType, userId);
         return ResponseEntity.ok().body(listOfTotal);
     }
+
 
     @GetMapping("get-categories")
     public ResponseEntity<List<ExpenseCategory>> getCategories(){

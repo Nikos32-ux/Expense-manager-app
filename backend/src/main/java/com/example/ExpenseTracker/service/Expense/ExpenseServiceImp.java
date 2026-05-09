@@ -62,8 +62,8 @@ public class ExpenseServiceImp implements ExpenseService {
 
 
     @Override
-    public List<CategoryTotalDTO> estimateCategoryTotal( CategoryFilterDTO categoryFilterDTO){
-        Long userId = UserContextUtils.getAuthenticatedUser().getId();
+    @Cacheable(value = "category-total-amount", key = "#userId + '_' + #categoryFilterDTO")
+    public List<CategoryTotalDTO> estimateCategoryTotal( CategoryFilterDTO categoryFilterDTO, Long userId){
         LocalDateTime startDate = DateUtils.processFilter(categoryFilterDTO.filter());
         return expenseRepository.findCategoryTotal(userId, startDate);
     }
@@ -94,7 +94,8 @@ public class ExpenseServiceImp implements ExpenseService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "monthly-expense-total", key = "#userId"),
-            @CacheEvict(value = "reportData", key = "#userId")
+            @CacheEvict(value = "reportData", key = "#userId"),
+            @CacheEvict(value = "category-total-amount", key = "#userId")
     })
     public ExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId) {
         ExpenseCategory category = expenseCatRepository.findById(expenseReqDTO.categoryId())
@@ -119,7 +120,8 @@ public class ExpenseServiceImp implements ExpenseService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "monthly-expense-total", key = "#userId"),
-            @CacheEvict(value = "reportData", key = "#userId")
+            @CacheEvict(value = "reportData", key = "#userId"),
+            @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public ExpenseResDTO updateExpense(Long expenseId, ExpenseReqDTO expenseReqDTO, Long userId) {
         Expense expense = getExpenseById(expenseId, userId);
@@ -148,12 +150,13 @@ public class ExpenseServiceImp implements ExpenseService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "monthly-expense-total", key = "#userId"),
-            @CacheEvict(value = "reportData", key = "#userId")
+            @CacheEvict(value = "reportData", key = "#userId"),
+            @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public void deleteExpense(Long id, Long userId) {
         Expense expense = getExpenseById(id, userId);
 
-        expenseRepository.deleteById(id);
+        expenseRepository.deleteById(expense.getId());
         reportRepository.markReportStale(userId);
         auditPublisher.publishEvent(
                 expense.getUser().getId(),

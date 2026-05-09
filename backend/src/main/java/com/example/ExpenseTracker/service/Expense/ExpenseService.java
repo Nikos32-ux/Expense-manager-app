@@ -19,6 +19,6 @@ public interface ExpenseService {
     List<ExpenseCategory> getExpenseCategories();
     Page<ExpenseResDTO> getDashExpenses( Long userId, Pageable pageable);
     MonthExpensesTotalInterface totalExpenses(Long userId);
-    List<CategoryTotalDTO> estimateCategoryTotal(CategoryFilterDTO filterType);
+    List<CategoryTotalDTO> estimateCategoryTotal(CategoryFilterDTO filterType, Long userId);
 
 }

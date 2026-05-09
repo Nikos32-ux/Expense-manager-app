@@ -27,7 +27,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     @PostConstruct
     public void init() {
-        System.out.println("RL FILTER CREATED");
+        log.info("RateLimitingFilter initialized");
     }
 
     @Override
@@ -35,26 +35,28 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filter) throws ServletException, IOException {
 
-        System.out.println("entering rl filter");
 
         String path = request.getRequestURI();
-        log.debug("path from rl: {}", path);
         String key = rateLimitingService.extractIpOrEmail(request) + path;
-        log.debug("key from rl: {}", key);
+        log.debug("Applying rate limiting for key: {}", key);
+
         Bucket bucket = rateLimitingService.getOrCreateBucket(key, path);
-        System.out.println("AFTER BUCKET");
 
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
-            System.out.println("token is consumed");
-            System.out.println("remaining = " + probe.getRemainingTokens());
+            log.debug("Request allowed for key: {}, remaining tokens: {}",
+                    key,
+                    probe.getRemainingTokens());
             filter.doFilter(request, response);
             return;
-        } else {
+        }
             long nanos = probe.getNanosToWaitForRefill();
             long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
             ObjectMapper objectMapper = new ObjectMapper();
 
+        log.warn("Rate limit exceeded for key: {}, retry after: {} seconds",
+                key,
+                seconds);
             response.setStatus(429);
             response.setContentType("application/json");
             response.setHeader("Retry-After", String.valueOf(seconds));
@@ -65,6 +67,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             responseBody.put("timestamp", LocalTime.now().toString());
 
             objectMapper.writeValue( response.getOutputStream(), responseBody);
-        }
+
     }
 }

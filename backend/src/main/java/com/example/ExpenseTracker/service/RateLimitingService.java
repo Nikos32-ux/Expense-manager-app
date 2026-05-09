@@ -54,8 +54,8 @@ public class RateLimitingService {
     }
 
     private Bucket createBucket(String key, String path){
-        System.out.println("create bucket");
         Rule type = findRateLimitPolicy(path);
+        log.debug("Creating new rate limit bucket for path: {}", path);
         return Bucket.builder()
                 .addLimit(limit ->
                         limit.capacity(type.getCapacity())
@@ -64,7 +64,6 @@ public class RateLimitingService {
     }
 
     public Bucket getOrCreateBucket(String key, String path){
-        log.debug("got inside checking bucket");
         System.out.println(buckets.estimatedSize());
         return buckets.get(key, k -> createBucket(k, path));
     }

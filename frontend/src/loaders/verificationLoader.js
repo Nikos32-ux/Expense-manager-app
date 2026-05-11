@@ -19,7 +19,7 @@ export const verificationLoader = async ({ request }) => {
         console.log("no auth user");
         
         const path = new URL(request.url).pathname;
-        if (path.startsWith("/dashboard") || path.startsWith("/profile") || path.startsWith("/transactions")) {
+        if (path.startsWith("/dashboard") || path.startsWith("/profile") || path.startsWith("/transactions") || path.startsWith("/categories")) {
             throw redirect("/");
         }
         return null;

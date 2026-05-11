@@ -5,17 +5,21 @@ import { useRouteLoaderData } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 import api from "../axiosClientApi/axios";
+import { ExpenseDetailContext } from "./ExpenseDetailContext";
 
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const authUser = useRouteLoaderData("root");
-
+    const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
+    
     const getNotifications = async () => {    
         const res = await api.get("notifications/get-notifications");
+        if(res.data.length === 0) {
+            setReportStale(true);
+        }
         return res.data;
     }
-
 
     const { data: notifications = [], isLoading: notificationsIsLoading } = useQuery({
         queryKey: ["notifications"],
@@ -32,8 +36,8 @@ export const WebSocketProvider = ({ children }) => {
         });
 
         client.onConnect = () => {
-            
             client.subscribe("/user/topic/notifications", (msg) => {
+                setReportStale(false);
                 const message = JSON.parse(msg.body);
                 queryClient.setQueryData(
                     ["notifications"],

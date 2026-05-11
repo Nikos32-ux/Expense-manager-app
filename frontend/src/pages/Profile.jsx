@@ -12,10 +12,12 @@ import NotificationPopUp from '../components/profile-modals/NotificationPopUp.js
 import { formatDistanceToNow } from "date-fns";
 import { queryClient } from '../context/queryClient.js';
 import useProfile from '../hooks/useProfile.jsx';
+import { ExpenseDetailContext } from '../context/ExpenseDetailContext.jsx';
 
 
 const Profile = () => {
   const { notifications } = useContext(WebSocketContext);
+  const { reportStale, setReportStale } = useContext(ExpenseDetailContext);
   const user = useRouteLoaderData("root");
   const { t, i18n } = useTranslation();
   const [openNotificationById, setOpenNotificationById] = useState(null);
@@ -28,11 +30,22 @@ const Profile = () => {
   }
 
 
-  const openNotification = async (id) => {
+  const handleReportCall = () => {
+    if (reportStale) {
+      exportFileMutate();
+    } else{
+      const latestNotification = notifications[notifications.length - 1];
+      if (latestNotification?.type === "FILE_GENERATED") {
+        setOpenNotificationById(latestNotification.id);
+      }
+    }
+  }
+
+  const markNotificationRead = async (id) => {
     try {
       const notificationOpened = notifications.find(n => n.id === id);
-      if (notificationOpened && notificationOpened.isRead === true) {
-        console.log("already marked read, no api call");
+      if (notificationOpened && notificationOpened.isRead === true) 
+        {
         return;
       }
       const res = await api.put(`notifications/mark-as-read/${id}`);
@@ -129,8 +142,9 @@ const Profile = () => {
                         <div
                           key={notification.id}
                           onClick={() => {
-                            openNotification(notification.id);
+                            markNotificationRead(notification.id);
                             setOpenNotificationById(notification.id);
+                            setOpenDropDown(false);
                           }}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                         >
@@ -152,11 +166,11 @@ const Profile = () => {
                   )}
                 </div>
               )}
-              {openNotificationById && 
-                <NotificationPopUp 
-                  setOpenDropDown={setOpenDropDown} 
-                  setOpenNotificationById={setOpenNotificationById} 
-                  openNotificationById={openNotificationById} 
+              {openNotificationById &&
+                <NotificationPopUp
+                  setOpenDropDown={setOpenDropDown}
+                  setOpenNotificationById={setOpenNotificationById}
+                  openNotificationById={openNotificationById}
                 />
               }
             </div>
@@ -186,8 +200,8 @@ const Profile = () => {
               <LuShieldCheck size={24} className='text-blue-600' />
               <p className='text-lg font-medium text-gray-800'>{t("security")}</p>
             </Link>
-            <button 
-              onClick={() => exportFileMutate()} 
+            <button
+              onClick={() => handleReportCall()}
               disabled={exportFileisPending ? true : false}
               className='flex items-center bg-white gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
               <LuFileUp size={24} className='text-blue-600' />

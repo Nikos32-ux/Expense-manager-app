@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Form, useActionData, useNavigate, useNavigation } from 'react-router-dom';
 import api from '../../axiosClientApi/axios';
 import { fetchCategories } from '../../api/fetchCategories';
 import { useQuery } from '@tanstack/react-query';
 import { LuBanknote } from 'react-icons/lu'
 import { queryClient } from '../../context/queryClient';
+import { ExpenseDetailContext } from '../../context/ExpenseDetailContext';
 
 const AddExpense = () => {
   const data = useActionData();
   const textareaRef = useRef(null);
+  const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
   const [desc, setDesc] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -41,8 +43,7 @@ const AddExpense = () => {
     if (data?.success && startProcessRef.current === false) {
       startProcessRef.current = true;
       setSuccess(data?.success);
-
-      queryClient.invalidateQueries(["month-expenses-total"]);
+      setReportStale(true);
       queryClient.invalidateQueries(["month-expenses-total"]);
       queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"] });
       queryClient.invalidateQueries({ queryKey: ["expenses"] });

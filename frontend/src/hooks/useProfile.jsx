@@ -4,28 +4,20 @@ import api from '../axiosClientApi/axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { WebSocketContext } from '../context/WebsocketContext';
+import { ExpenseDetailContext } from '../context/ExpenseDetailContext';
 
 
 
 const useProfile = ({ setOpenNotificationById }) => {
+    const {markReportStale, setMarkReportStale} = useContext(ExpenseDetailContext);
     const {notifications} = useContext(WebSocketContext);
     const { t, i18n } = useTranslation();
+    
 
     const handleExportData = async () => {
         const res = await api.post("report/generate-report");
         return res.data;
     }
-
-    useEffect(() => {
-        if(notifications.length === 0) return;
-
-        const latestNotification = notifications[notifications.length - 1];
-        if(latestNotification.type === "FILE_GENERATED"){
-            setOpenNotificationById(latestNotification.id);
-        }
-    },[notifications]);
-
-    
     const { mutate: exportFileMutate, isPending: exportFileisPending } = useMutation({
         mutationFn: handleExportData,
         onSuccess: (data) => {

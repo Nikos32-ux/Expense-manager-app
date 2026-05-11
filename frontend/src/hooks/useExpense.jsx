@@ -1,12 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '../axiosClientApi/axios';
 import { queryClient } from '../context/queryClient';
 import { useNavigate } from 'react-router-dom';
+import { ExpenseDetailContext } from '../context/ExpenseDetailContext';
 
 const useExpense = (id) => {
     const navigate = useNavigate();
-
+    const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
     const saveChanges = async ({ id, data }) => {
         const indexOfDelimiter = data.date.indexOf("T");
         const updateData = {
@@ -25,6 +26,7 @@ const useExpense = (id) => {
     const { mutate: updateExpense, isPending: updatePending, isSuccess: updateSuccess } = useMutation({
         mutationFn: saveChanges,
         onSuccess: () => {
+            setReportStale(true);
             queryClient.invalidateQueries(["expense", id]);
             queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"] });
             queryClient.invalidateQueries({ queryKey: ["expenses"] });
@@ -42,6 +44,7 @@ const useExpense = (id) => {
         mutationFn: softDeleteExpense,
         onSuccess: () => {
             navigate("/dashboard", { state: { deleted: true } });
+            setReportStale(true);
             queryClient.removeQueries({ queryKey: ["expense", id] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"] });
             queryClient.invalidateQueries({ queryKey: ["expenses"] });

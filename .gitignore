@@ -5,11 +5,16 @@ backend/.env
 backend/env.docker
 backend/.idea/
 
+
+# root
+.env.docker
+.idea/
+
 # frontend
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
-frontend/.env
+frontend/.env*
 
 # general
 .vscode/

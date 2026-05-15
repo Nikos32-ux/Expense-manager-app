@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: expense-db
+    env_file:
+      - .env.docker
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  nginx:
+    image: expense-gateway:latest
+    container_name: global-proxy
+    ports:
+      - "80:80"
+    depends_on:
+      expense-app:
+        condition: service_started
+
+  expense-app:
+    image: expense-tracker:latest
+    container_name: expense-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - .env.docker
+    ports:
+      - "8081:8080"
+
+volumes:
+  postgres-data:
+  frontend-files:

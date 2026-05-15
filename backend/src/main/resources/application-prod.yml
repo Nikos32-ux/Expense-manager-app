@@ -1,17 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:5432/${DB_NAME:expense_db}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
       connection-timeout: 30000
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:rabbitmq}
-    username: ${RABBITMQ_USER:guest}
-    password: ${RABBITMQ_PASS:guest}
+    host: ${SPRING_RABBITMQ_HOST}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
 
   jpa:
     hibernate:

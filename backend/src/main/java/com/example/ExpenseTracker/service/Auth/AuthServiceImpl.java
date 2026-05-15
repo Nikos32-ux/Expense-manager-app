@@ -50,13 +50,7 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResDTO saveUser(RegisterRequestDTO registerRequestDTO){
         tikaService.validateFile(registerRequestDTO.imageProfile());
 
-       Integer userRow = userRepository.createIfNotExists(
-               registerRequestDTO.username(),
-               registerRequestDTO.email(),
-               registerRequestDTO.password()
-       );
-
-       if(userRow == 0){
+       if(userRepository.existsByEmail(registerRequestDTO.email())){
            throw new EmailAlreadyExistsException(registerRequestDTO.email());
        }
 

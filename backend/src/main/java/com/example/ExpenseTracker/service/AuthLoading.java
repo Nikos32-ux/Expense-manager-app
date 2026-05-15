@@ -4,11 +4,13 @@ import com.example.ExpenseTracker.repository.UserRepository;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 
-@Service
+@Configuration
 public class AuthLoading {
 
     @Bean
@@ -16,6 +18,7 @@ public class AuthLoading {
         return Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .maximumSize(1000)
-                .build(userRepository::findByEmail);
+                .build(email -> userRepository.findByEmail(email)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email)));
     }
 }

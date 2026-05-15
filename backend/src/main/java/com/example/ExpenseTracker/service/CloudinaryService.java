@@ -18,7 +18,7 @@ public class CloudinaryService {
 
     public String uploadImageProfile(MultipartFile file, String email){
        try{
-           Map uploadResult = cloudinary.uploader().upload(file.getInputStream(),
+           Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                    ObjectUtils.asMap("folder", "user_profiles", "transformation", "c_fill,g_face,w_300,h_300,q_auto,f_auto"
                    ));
 

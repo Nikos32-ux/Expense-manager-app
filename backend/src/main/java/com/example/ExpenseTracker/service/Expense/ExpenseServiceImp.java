@@ -1,5 +1,4 @@
 package com.example.ExpenseTracker.service.Expense;
-import com.example.ExpenseTracker.ExpensesFilters;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.exception.CategoryNotFoundException;
 import com.example.ExpenseTracker.model.ExpenseCategory;

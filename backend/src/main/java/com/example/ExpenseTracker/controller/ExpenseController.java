@@ -1,5 +1,4 @@
 package com.example.ExpenseTracker.controller;
-import com.example.ExpenseTracker.ExpensesFilters;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.mapper.ExpenseMapper;
 import com.example.ExpenseTracker.model.Expense;

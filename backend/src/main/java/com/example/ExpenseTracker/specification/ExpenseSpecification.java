@@ -1,9 +1,9 @@
 package com.example.ExpenseTracker.specification;
+import com.example.ExpenseTracker.dto.ExpensesFilters;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import com.example.ExpenseTracker.ExpensesFilters;
 import com.example.ExpenseTracker.model.Expense;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
@@ -17,10 +17,10 @@ public class ExpenseSpecification {
     public static Specification<Expense> build(ExpensesFilters filters, Long userId){
         return Specification.allOf(
                 hasUserId(userId),
-                hasCategory(filters.getCategory()),
-                hasDate(filters.getMonth()),
-                hasMinMax(filters.getAmountMin(), filters.getAmountMax()),
-                hasSearch(filters.getSearch())
+                hasCategory(filters.category()),
+                hasDate(filters.month()),
+                hasMinMax(filters.amountMin(), filters.amountMax()),
+                hasSearch(filters.search())
         );
     }
 

@@ -27,12 +27,7 @@ public class AuthController {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
-    @GetMapping("/debug/hash")
-    public String userRegister(){
-
-        return bCryptPasswordEncoder.encode("12345");
-    }
+    
    
     @PostMapping("/register")
     public ResponseEntity<RegisterResDTO> userRegister(@Valid @ModelAttribute RegisterRequestDTO registerRequestDTO){

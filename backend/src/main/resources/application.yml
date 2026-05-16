@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE}
   jpa:
     open-in-view: false
     hibernate:
@@ -40,8 +40,6 @@ logging:
         jdbc: WARN
     liquibase: WARN
 
-jwt:
-  secret: ${JWT_SECRET}
 
 rate-limiting:
   rules:

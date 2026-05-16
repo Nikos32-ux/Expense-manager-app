@@ -18,7 +18,7 @@ import { ExpenseDetailContext } from '../context/ExpenseDetailContext.jsx';
 const Profile = () => {
   const { notifications } = useContext(WebSocketContext);
   const { reportStale, setReportStale } = useContext(ExpenseDetailContext);
-  const user = useRouteLoaderData("root");
+  const { data: user, isLoading, isSuccess } = useQuery(verifyUser());
   const { t, i18n } = useTranslation();
   const [openNotificationById, setOpenNotificationById] = useState(null);
   const [openDropdown, setOpenDropDown] = useState(false);
@@ -33,7 +33,7 @@ const Profile = () => {
   const handleReportCall = () => {
     if (reportStale) {
       exportFileMutate();
-    } else{
+    } else {
       const latestNotification = notifications[notifications.length - 1];
       if (latestNotification?.type === "FILE_GENERATED") {
         setOpenNotificationById(latestNotification.id);
@@ -44,10 +44,7 @@ const Profile = () => {
   const markNotificationRead = async (id) => {
     try {
       const notificationOpened = notifications.find(n => n.id === id);
-      if (notificationOpened && notificationOpened.isRead === true) 
-        {
-        return;
-      }
+      if (notificationOpened && notificationOpened.isRead === true) return;
       const res = await api.put(`notifications/mark-as-read/${id}`);
       queryClient.setQueryData(
         ["notifications"],
@@ -175,16 +172,29 @@ const Profile = () => {
               }
             </div>
           </div>
-          <div className="profile-pic w-24 h-24 rounded-full border-2 border-white mt-4 mx-auto">
-            <img src={user.imageProfile} className='w-full h-full object-cover rounded-full' alt="" />
-          </div>
+          {isLoading
+            ? <div className="h-24 w-24 bg-gray-300 animate-pulse mx-auto mt-4 rounded-full" />
+            : (
+              <div className="profile-pic w-24 h-24 rounded-full border-2 border-white mt-4 mx-auto">
+                <img src={user.imageProfile} className='w-full h-full object-cover rounded-full' alt="" />
+              </div>
+            )
+          }
+
         </div>
         <div className="settings-container bg-gray-50 flex flex-col h-full p-4 flex-1 overflow-auto-y -mt-4">
           <div className='pt-8 w-full mt-3'>
-            <div className='mx-auto text-center text-gray-900'>
-              <p className='text-3xl font-bold italic'>{user.username}</p>
-              <p className='text-lg text-blue-400'>{user.email}</p>
-            </div>
+            {isLoading ? (
+              <div className="mx-auto text-center mt-6 space-y-3">
+                <div className="h-8 w-40 bg-gray-300 animate-pulse rounded-md mx-auto" />
+                <div className="h-5 w-32 bg-gray-200 animate-pulse rounded-md mx-auto" />
+              </div>
+            ) : (
+              <div className="mx-auto text-center text-gray-900">
+                <p className="text-3xl font-bold italic">{user.username}</p>
+                <p className="text-lg text-blue-400">{user.email}</p>
+              </div>
+            )}
           </div>
           <div className="settings-list w-[90%]  mx-auto py-5 text-center p-4 flex flex-col gap-5">
             <Link

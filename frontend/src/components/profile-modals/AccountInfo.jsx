@@ -8,10 +8,12 @@ import api from '../../axiosClientApi/axios';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
 import { useRouteLoaderData } from 'react-router-dom';
+import { queryClient } from '../../context/queryClient';
+
 
 const AccountInfo = () => {
     const { t, i18n } = useTranslation();
-    const user = useRouteLoaderData("root")
+    const {data: user, isLoading, isSuccess} = useQuery(verifyUser());
     const modalRef = useRef(null);
     const usernameRef = useRef(null);
     const emailRef = useRef(null);
@@ -54,18 +56,17 @@ const AccountInfo = () => {
         }
     }, [isUsernameEdit, isEmailEdit]);
 
-
-
     const handleUpdateAccount = async (data) => {
         const res = await api.put("auth/update-account-info", data);
         console.log("updateAccount result", res.data);
         return res.data;
     }
 
-    const { mutate: applyAccountUpdatedInfo, isPending: updateAccountisPending } = useMutation({
+    const { mutate: applyAccountUpdatedInfo, isPending: updateAccountIsPending } = useMutation({
         mutationFn: handleUpdateAccount,
         onSuccess: (data) => {
-            toast.success("Account successfully updated")
+            queryClient.invalidateQueries(["verification"]);
+            toast.success("Account successfully updated");
         },
         onError: () => {
             toast.error("Failed to update account");
@@ -153,9 +154,9 @@ lg:left-72 lg:w-[calc(100%-18rem)]'>
                     <div className=' w-full flex justify-center'>
                         <button
                             onClick={() => applyAccountUpdatedInfo(draftContent)}
-                            disabled={updateAccountisPending}
-                            className={`${updateAccountisPending ? "hover:bg-blue-200" : "bg-blue-400 "} text-white font-bold w-full rounded-xl lg:max-w-[200px] text-bold tracking-widest text-lg transition-all duration-200 p-3 mt-5`}>
-                            {!updateAccountisPending ? t('update') : "Updating..."}
+                            disabled={updateAccountIsPending}
+                            className={`${updateAccountIsPending ? "hover:bg-blue-200" : "bg-blue-400 "} text-white font-bold w-full rounded-xl lg:max-w-[200px] text-bold tracking-widest text-lg transition-all duration-200 p-3 mt-5`}>
+                            {!updateAccountIsPending ? t('update') : "Updating..."}
                         </button>
                     </div>
                 </div>

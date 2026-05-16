@@ -22,7 +22,7 @@ import { Client } from '@stomp/stompjs';
 
 
 const DashBoard = () => {
-  const user = useRouteLoaderData("root");
+  const {data: user, isLoading, isSuccess} = useQuery(verifyUser());
   const { notifications, setNotifications } = useContext(WebSocketContext);
   const { t, i18n } = useTranslation();
   const location = useLocation();

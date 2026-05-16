@@ -30,7 +30,7 @@ export const WebSocketProvider = ({ children }) => {
     useEffect(() => {
         if (!authUser) return;
         const client = new Client({
-            brokerURL: "ws://localhost:8080/ws-expense-tracker",
+            brokerURL: import.meta.env.VITE_WS_URL,
             reconnectDelay: 5000,
             withCredentials: true
         });

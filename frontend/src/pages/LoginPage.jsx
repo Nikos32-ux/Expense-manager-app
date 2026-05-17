@@ -66,9 +66,7 @@ const LoginPage = () => {
         <h1 className='text-blue-500 text-2xl italic mb-6'>Sign in</h1>
       </div>
 
-      <Form method='post'
-            className='sign-in-form flex flex-col items-center justify-center pb-6 lg:w-[400px]'>
-
+      <Form method='post' className={`sign-in-form flex flex-col items-center justify-center pb-6 lg:w-[400px] ${navigation.state === "submitting" ? "opacity-50 event-pointers-none" : "opacity-100" }`}>
         {displayError && (
           <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
             <p className='text-white text-[18px] font-semibold'>{displayError}</p>
@@ -86,6 +84,7 @@ const LoginPage = () => {
           <div className='input flex relative w-[90%]'>
             <LuUser className='icon  text-blue-400 w-4 h-4 absolute left-1 z-10 top-1/2 -translate-y-1/2' />
             <input
+              disabled={navigation.state === "submitting"}
               name='email'
               className='w-full text-gray-900 rounded-lg py-2 border-2 border-white/20 ring-1 ring-blue-400/20 pl-10 shadow-md'
               type="email"
@@ -96,6 +95,7 @@ const LoginPage = () => {
           <div className='input flex relative w-[90%]'>
             <LuLock className='icon text-blue-400 w-4 h-4 absolute left-1 z-10 top-1/2 -translate-y-1/2' />
             <input
+              disabled={navigation.state === "submitting"}
               name='password'
               className='w-full text-gray-900 rounded-lg py-2 border-2 border-white/20 ring-1 ring-blue-400/20 pl-10 shadow-md'
               type="password"
@@ -108,14 +108,21 @@ const LoginPage = () => {
           <button
             disabled={navigation.state === "submitting"}
             type='submit'
-            className={`w-full ${navigation.state === "submitting" ? "bg-blue-500/20" : "bg-blue-500"} text-white p-2 shadow-md rounded-md font-bold`}>
-            {navigation.state === "submitting" ? "Signing in...." : "Sign in"}
+            className={`w-full ${navigation.state === "submitting" ? "bg-blue-400/20" : "bg-blue-600"} text-white p-2 shadow-md rounded-md font-bold`}>
+            {navigation.state === "submitting" 
+              ? (
+                <span className='flex items-center justify-center gap-2'>
+                  <span className='animate-spin h-4 w-4 border-2 border-white border-b-transparent rounded-full'></span>
+                  Signing in....
+                </span>
+              ) 
+              : "Sign in"}
           </button>
         </div>
 
         <p className='mt-3 text-white/60'>
           I'm new user.
-          <Link to={"/register"} className='text-blue-400 font-semibold ml-2 hover:text-blue-300 transition-colors'>
+          <Link to={"/register"} className={`text-blue-400 font-semibold ml-2 hover:text-blue-300 transition-colors ${navigation.state === "submitting" ? "opacity-50 event-pointers-none" : "" } `}>
             SIGN UP
           </Link>
         </p>

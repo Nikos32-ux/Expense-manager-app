@@ -5,6 +5,7 @@ import { verifyUser } from "../queries/authQuery";
 
 
 export const verificationLoader = async ({ request }) => {
+    const path = new URL(request.url).pathname;
     const isPrivateRoute = (
         path.startsWith("/dashboard") ||
         path.startsWith("/profile") ||
@@ -18,18 +19,17 @@ export const verificationLoader = async ({ request }) => {
     );
     
         try {
-        const path = new URL(request.url).pathname;
-        const cached = queryClient.getQueryData(["verification"]);
+        
+        
+        const user = await queryClient.ensureQueryData(verifyUser());
 
-        if (isPublicRoute) {
-            if (!cached) return null;
+        if(isPublicRoute && user){
             return redirect("/dashboard");
         }
         
-        const user = await queryClient.ensureQueryData(verifyUser());
         return user;
     }
-    catch (error) {
+    catch (error) {   
         const status = error?.response?.status;
         const path = new URL(request.url).pathname;
 

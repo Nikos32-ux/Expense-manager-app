@@ -34,8 +34,14 @@ const router = createBrowserRouter([
     element: <App />,
     id: "root",
     loader: verificationLoader,
+    shouldRevalidate: ({ formAction }) => {
+      if (["/register", "/register/", "/login", "/login/"].includes(formAction)) {
+        return false;
+      }
+      return true;
+    },
     hydrateFallbackElement: <LoadSpinner />,
-    errorElement: <RootErrorBoundary/>,
+    errorElement: <RootErrorBoundary />,
     children: [
       {
         index: true,
@@ -89,10 +95,10 @@ window.queryClient = queryClient;
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-        <ExpenseDetailProvider>
-          <Toaster/>
-          <RouterProvider router={router} />
-        </ExpenseDetailProvider>
+      <ExpenseDetailProvider>
+        <Toaster />
+        <RouterProvider router={router} />
+      </ExpenseDetailProvider>
     </QueryClientProvider>
   </StrictMode>
 )

@@ -49,7 +49,8 @@ rate-limiting:
       refillMinutes: 15
 
     - path: "/auth/register"
-      capacity: 5
+      capacity: 8
+
       refillTokens: 1
       refillMinutes: 30
 

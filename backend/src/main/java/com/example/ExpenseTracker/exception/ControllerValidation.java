@@ -89,7 +89,6 @@ public class ControllerValidation {
 
     @ExceptionHandler(FileReadException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleFileReadException(FileReadException ex){
-        ex.printStackTrace();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(500, ex.getMessage(), LocalDate.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionRes);
     }

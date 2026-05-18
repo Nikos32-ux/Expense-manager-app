@@ -11,7 +11,7 @@ import AddExpense from './components/expenses/AddExpense.jsx';
 import AddIncome from './components/expenses/AddIncome.jsx';
 import ExpenseDetail from './components/expenses/ExpenseDetail.jsx';
 import LoginPage, { loginAction } from './pages/LoginPage.jsx';
-import RegisterPage from './pages/RegisterPage.jsx';
+import RegisterPage, { registerAction } from './pages/RegisterPage.jsx';
 import Profile from './pages/Profile.jsx';
 import AccountInfo from './components/profile-modals/AccountInfo.jsx';
 import Security from './components/profile-modals/Security.jsx';
@@ -26,6 +26,7 @@ import { addIncomeAction } from './components/expenses/AddIncome.jsx';
 import { addExpenseAction } from './components/expenses/AddExpense.jsx';
 import { WebSocketProvider } from './context/WebsocketContext.jsx';
 import toast, { Toaster } from 'react-hot-toast';
+import RootErrorBoundary from './components/ui/RootErrorBoundary.jsx';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
     id: "root",
     loader: verificationLoader,
     hydrateFallbackElement: <LoadSpinner />,
+    errorElement: <RootErrorBoundary/>,
     children: [
       {
         index: true,
@@ -55,7 +57,8 @@ const router = createBrowserRouter([
       },
       {
         path: "register",
-        element: <RegisterPage />
+        element: <RegisterPage />,
+        action: registerAction
       },
       {
         path: "profile",

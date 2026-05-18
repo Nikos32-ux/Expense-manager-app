@@ -5,23 +5,37 @@ import { verifyUser } from "../queries/authQuery";
 
 
 export const verificationLoader = async ({ request }) => {
-    try {
+    const isPrivateRoute = (
+        path.startsWith("/dashboard") ||
+        path.startsWith("/profile") ||
+        path.startsWith("/transactions") ||
+        path.startsWith("/categories")
+    );
+    const isPublicRoute = (
+        path === "/login" || 
+        path === "/register" || 
+        path === "/"
+    );
+    
+        try {
         const path = new URL(request.url).pathname;
-        const user = await queryClient.ensureQueryData(verifyUser());
+        const cached = queryClient.getQueryData(["verification"]);
 
-        if (user && (path === "/login" || path === "/register" || path === "/")) {
+        if (isPublicRoute) {
+            if (!cached) return null;
             return redirect("/dashboard");
         }
-
+        
+        const user = await queryClient.ensureQueryData(verifyUser());
         return user;
     }
     catch (error) {
-        console.log("no auth user");
-        
+        const status = error?.response?.status;
         const path = new URL(request.url).pathname;
-        if (path.startsWith("/dashboard") || path.startsWith("/profile") || path.startsWith("/transactions") || path.startsWith("/categories")) {
-            throw redirect("/");
+
+        if (isPrivateRoute) {
+            if (status === 401) throw redirect("/login");
+            throw error;
         }
-        return null;
     }
 }

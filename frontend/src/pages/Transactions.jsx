@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState, useContext } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { LuUtensils, LuChevronDown, LuChevronsUpDown, LuShoppingBag, LuCar, LuPanelTop, LuWallet, LuHeartPulse, LuLayoutGrid, LuLayoutDashboard, LuLogOut, LuUser, LuArrowLeftRight, LuZap, LuTv, LuChevronRight, LuX, LuAArrowDown, LuSquareArrowUp, LuAArrowUp, LuArrowUp, LuArrowDown } from 'react-icons/lu';
 import Navbar from '../components/ui/Navbar';
 import MonthListFilter from '../components/transactions/MonthListFilter';
@@ -19,7 +19,6 @@ import { useTranslation } from 'react-i18next';
 const Transactions = () => {
   const { t } = useTranslation();
   const [openPicker, setOpenPicker] = useState(false);
-  const location = useLocation();
   const [expenseIncome, setExpenseIncome] = useState(null);
   const [displayFilters, setDisplayFilters] = useState(false);
   const [toggledArrow, setToggledArrow] = useState(false);

@@ -95,7 +95,6 @@ const Categories = () => {
             <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center`}>
               <Icon size={20} className={text} />
             </div>
-
             <span className="font-bold text-gray-700 text-xl">{t(category.category)}</span>
           </div>
           <div className='flex gap-3 px-3'>

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { LuCar, LuPencilLine, LuCheck, LuSquareX, LuX, LuLayoutGrid, LuCalendarDays, LuCreditCard, LuTrash2, LuSquarePen, LuHash } from 'react-icons/lu';
 import { Link, useParams } from 'react-router-dom';
 import useExpense from '../../hooks/useExpense';
@@ -9,7 +9,6 @@ import  {categories}  from '../../categories/categories.js';
 
 const ExpenseDetail = () => {
   const { id } = useParams();
-  const location = useLocation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateExpensePending, setUpdateExpensePending] = useState(null);
   const [updateExpenseSuccess, setUpdateExpenseSuccess] = useState(null);

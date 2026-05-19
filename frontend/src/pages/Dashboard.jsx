@@ -1,4 +1,4 @@
-import { Link, Outlet, useLoaderData, useLocation, useNavigate, useRouteLoaderData } from 'react-router-dom';
+import { Link, Outlet, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router-dom';
 import Navbar from '../components/ui/Navbar.jsx';
 import { useTranslation } from 'react-i18next'
 import AddExpense from '../components/expenses/AddExpense.jsx';
@@ -9,7 +9,7 @@ import { verifyUser } from '../queries/authQuery';
 import Expense from '../components/expenses/Expense.jsx';
 import useAuth from '../hooks/useAuth';
 import * as LuIcons from "react-icons/lu";
-import { LuUser, LuBell, LuChevronLeft, LuSettings2,LuPlus, LuDownload,LuPanelTop, LuShieldCheck,LuLayoutGrid,LuWallet, LuFileUp, LuLogOut, LuFileText } from 'react-icons/lu';
+import { LuUser, LuBell, LuChevronLeft, LuSettings2, LuPlus, LuDownload, LuPanelTop, LuShieldCheck, LuLayoutGrid, LuWallet, LuFileUp, LuLogOut, LuFileText } from 'react-icons/lu';
 
 import LoadSpinner from '../components/ui/LoadSpinner.jsx';
 import { categories } from '../categories/categories.js';
@@ -22,10 +22,9 @@ import { Client } from '@stomp/stompjs';
 
 
 const DashBoard = () => {
-  const {data: user, isLoading, isSuccess} = useQuery(verifyUser());
+  const { data: user, isLoading, isSuccess } = useQuery(verifyUser());
   const { notifications, setNotifications } = useContext(WebSocketContext);
   const { t, i18n } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const mutation = useAuth();
   const [showDeletedSuccess, setShowDeletedSuccess] = useState(false);
@@ -69,7 +68,7 @@ const DashBoard = () => {
   return (
     <>
       <div className='h-screen flex flex-col lg:flex-row bg-white'>
-        
+
         <aside className="hidden lg:flex lg:w-72 lg:flex-col bg-slate-950 text-white shrink-0 border-r border-white/5 relative overflow-hidden 
                             bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900
                             shadow-2xl shadow-black/40">
@@ -124,31 +123,49 @@ const DashBoard = () => {
         </aside>
         <div className="flex flex-col flex-1">
           <div className='header pt-2 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.6)),url("/login-page.jpg")] bg-cover bg-center h-[30vh] max-h-[30vh]'>
-            <div className=' flex justify-between px-5  mt-5'>
-              <div className='flex justify-between items-center'>
-                <div className='w-12 h-12 border-2 border-blue-500 rounded-full'>
-                  <img src={user.imageProfile} className=' w-full h-full rounded-full object-cover' alt="" />
-                </div>
-                <p className='text-blue-400 ml-3 w-[120px] font-bold tracking-wider text-sm'>{t("welcome-back")}, <span className='text-white text-lg leading-tight'>{user.username}</span></p>
-              </div>
-              <div className='flex items-center gap-1'>
-                <button onClick={() => {
-                  setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-                }} className='bg-blue-500/20 p-2 hover:bg-blue-700/20 relative'>
-                  <LuBell size={24} className='text-blue-400 hover:text-white' />
-                  {notifications.filter(not => !not.isRead).length > 0 && (
-                    <span
-                      className='w-5 h-5 text-sm font-semibold rounded-full bg-red-600 absolute flex items-center justify-center top-0 -right-0'>
-                      {notifications.filter(not => !not.isRead).length}
-                    </span>
-                  )}
+            {isLoading
+              ? (
+                <div className="flex justify-between px-5 mt-5 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gray-300/30" />
+                    <div className="h-4 w-32 bg-gray-300/30 rounded" />
+                  </div>
 
-                </button>
-                <button onClick={() => mutation.mutate()} className='bg-blue-500/20 p-2 hover:bg-blue-700/20'>
-                  <LuLogOut size={24} className='text-blue-400  hover:text-white' />
-                </button>
-              </div>
-            </div>
+                  <div className="flex gap-2">
+                    <div className="w-10 h-10 bg-gray-300/30 rounded" />
+                    <div className="w-10 h-10 bg-gray-300/30 rounded" />
+                  </div>
+                </div>
+              )
+              : (
+                <div className=' flex justify-between px-5  mt-5'>
+                  <div className='flex justify-between items-center'>
+                    <div className='w-12 h-12 border-2 border-blue-500 rounded-full'>
+                      <img src={user.imageProfile} className=' w-full h-full rounded-full object-cover' alt="" />
+                    </div>
+                    <p className='text-blue-400 ml-3 w-[120px] font-bold tracking-wider text-sm'>{t("welcome-back")}, <span className='text-white text-lg leading-tight'>{user.username}</span></p>
+                  </div>
+                  <div className='flex items-center gap-1'>
+                    <button onClick={() => {
+                      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+                    }} className='bg-blue-500/20 p-2 hover:bg-blue-700/20 relative'>
+                      <LuBell size={24} className='text-blue-400 hover:text-white' />
+                      {notifications.filter(not => !not.isRead).length > 0 && (
+                        <span
+                          className='w-5 h-5 text-sm font-semibold rounded-full bg-red-600 absolute flex items-center justify-center top-0 -right-0'>
+                          {notifications.filter(not => !not.isRead).length}
+                        </span>
+                      )}
+
+                    </button>
+                    <button onClick={() => mutation.mutate()} className='bg-blue-500/20 p-2 hover:bg-blue-700/20'>
+                      <LuLogOut size={24} className='text-blue-400  hover:text-white' />
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+
           </div>
           <div className="card bg-blue-300/20 w-[90%] mx-auto lg:max-w-4xl items-start rounded-xl backdrop-blur-md shadow-2xl -mt-20 mb-10">
             {showDeletedSuccess &&
@@ -158,7 +175,6 @@ const DashBoard = () => {
               </div>
               )
             }
-
             <div className='flex flex-col items-start'>
               <h1 className='text-white font-bold text-start mt-3 ml-3'>{t("total-balance")}</h1>
               <p className='text-white text-2xl leading-tight  ml-3 font-semibold '>${estimateBalance()}</p>
@@ -167,7 +183,11 @@ const DashBoard = () => {
               <div className='income text-white flex items-center gap-2'>
                 <div>
                   <p className='text-xs uppercase tracking-widest text-gray-800/20 font-medium'>{t("income")}</p>
-                  <p className='text-lg font-bold text-green-600/60'>${monthIncomeDataIsLoading || !monthIncomeData ? "" : monthIncomeData.incomeTotal}</p>
+                  <p className='text-lg font-bold text-green-600/60'>
+                    {monthIncomeDataIsLoading || !monthIncomeData 
+                      ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" /> 
+                      : `$${monthIncomeData.incomeTotal}`}
+                  </p>
                 </div>
                 <Link to={"add-income"}>
                   <LuPlus size={24} className='bg-green-500/20 text-green-500/30 border border-green-500/50 hover:bg-green-400 transition-colors hover:text-white cursor-pointer ml-2 rounded-full' />
@@ -176,7 +196,10 @@ const DashBoard = () => {
               <div className='expense text-white flex items-center gap-2'>
                 <div>
                   <p className='text-xs uppercase tracking-widest  text-gray-800/20 font-medium'>{t("expenses")}</p>
-                  <p className='text-lg font-bold text-red-600/60'>${monthExpensesDataIsLoading || !monthExpensesData ? "" : monthExpensesData.amount}</p>
+                  <p className='text-lg font-bold text-red-600/60'>
+                    {monthExpensesDataIsLoading || !monthExpensesData
+                       ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" /> 
+                       : `$${monthExpensesData.amount}`}</p>
                 </div>
                 <Link to={"add-expense"}>
                   <LuPlus size={24} className='bg-red-500/30 text-red-500/30 border border-red-500/20 cursor-pointer hover:bg-red-400 transition-colors hover:text-white ml-2 rounded-full' />

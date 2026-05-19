@@ -66,7 +66,7 @@ const LoginPage = () => {
         <h1 className='text-blue-500 text-2xl italic mb-6'>Sign in</h1>
       </div>
 
-      <Form method='post' className={`sign-in-form flex flex-col items-center justify-center pb-6 lg:w-[400px] ${navigation.state === "submitting" ? "opacity-50 event-pointers-none" : "opacity-100" }`}>
+      <Form method='post' className={`sign-in-form flex flex-col items-center justify-center pb-6 lg:w-[400px] ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100" }`}>
         {displayError && (
           <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
             <p className='text-white text-[18px] font-semibold'>{displayError}</p>
@@ -122,7 +122,7 @@ const LoginPage = () => {
 
         <p className='mt-3 text-white/60'>
           I'm new user.
-          <Link to={"/register"} className={`text-blue-400 font-semibold ml-2 hover:text-blue-300 transition-colors ${navigation.state === "submitting" ? "opacity-50 event-pointers-none" : "" } `}>
+          <Link to={"/register"} className={`text-blue-400 font-semibold ml-2 hover:text-blue-300 transition-colors ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "" } `}>
             SIGN UP
           </Link>
         </p>

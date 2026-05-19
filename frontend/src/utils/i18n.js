@@ -44,7 +44,7 @@ const resources = {
       "Education": "Education",
       "Personal care": "Personal Care",
       "Subscriptions": "Subscriptions",
-      "Debt payments": "Debt Payments",
+      "Debt Payments": "Debt Payments",
       "Miscellaneous": "Miscellaneous",
       "total-spent":"total Spent",
       "password-must-match":"Passwords must match",
@@ -59,7 +59,19 @@ const resources = {
       "started-generating-report": "Report generation just begun, you will be notified once ready",
       "failed-to-start-report": "Failed to start report generation",
       "report-wait":"Please wait ...You will be notified",
-      "report-fresh-data": "Report already exists!"
+      "report-fresh-data": "Report already exists!",
+      "expense": "Expense",
+      "add-expense":"Add expense",
+      "transaction-date": "Transaction date",
+      "category": "Category",
+      "description": "Description",
+      "amount": "Amount",
+      "payment-method": "Payment method",
+      "card": "Card",
+      "cash": "Cash",
+      "add-description-expense": "Add a description for the expense",
+      "saving": "Saving...",
+      "save-expense": "Save expense"
     }
   },
   el: {
@@ -103,7 +115,7 @@ const resources = {
       "Education": "Εκπαίδευση",
       "Personal care": "Προσωπική Φροντίδα",
       "Subscriptions": "Συνδρομές",
-      "Debt payments": "Πληρωμές Χρεών",
+      "Debt Payments": "Πληρωμές Χρεών",
       "Miscellaneous": "Διάφορα",
       "total-spent": "Σύνολο",
       "password-must-match":"Οι κωδικοί πρέπει να ταιριάζουν",
@@ -118,8 +130,19 @@ const resources = {
       "started-generating-report": "Η δημιουργία του αρχείου ξεκίνησε, θα ειδοποιηθείτε με ενημέρωση",
       "report-wait":"Παρακαλώ περιμένετε, θα ενημερωθείτε με ειδοποίηση",
       "failed-to-start-report": "Αποτυχία έναρξης δημιουργίας αναφοράς",
-      "report-fresh-data": "Το αρχείο υπάρχει ήδη!"
-
+      "report-fresh-data": "Το αρχείο υπάρχει ήδη!",
+      "expense": "Συναλλαγη",
+      "add-expense":"Προσθήκη συναλλαγής",
+      "transaction-date": "Ημερομηνία συναλλαγής",
+      "category": "Κατηγορία",
+      "description": "Περιγραφή",
+      "amount": "Ποσό",
+      "payment-method":"Μέθοδος συναλλαγής",
+      "card": "Κάρτα",
+      "cash": "Μετρητά",
+      "add-description-expense": "Προσθέστε περιγραφή συναλλαγής",
+      "saving": "Αποθηκεύεται...",
+      "save-expense" : "Αποθήκευση"
     }
   }
 };

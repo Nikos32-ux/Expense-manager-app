@@ -3,6 +3,7 @@ import { Form, useActionData, useNavigate, useNavigation } from 'react-router-do
 import api from '../../axiosClientApi/axios';
 import { fetchCategories } from '../../api/fetchCategories';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { LuBanknote } from 'react-icons/lu'
 import { queryClient } from '../../context/queryClient';
 import { ExpenseDetailContext } from '../../context/ExpenseDetailContext';
@@ -10,7 +11,8 @@ import { ExpenseDetailContext } from '../../context/ExpenseDetailContext';
 const AddExpense = () => {
   const data = useActionData();
   const textareaRef = useRef(null);
-  const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
+  const {t} = useTranslation();
+  const { reportStale, setReportStale } = useContext(ExpenseDetailContext);
   const [desc, setDesc] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -78,17 +80,17 @@ const AddExpense = () => {
           <div>
             <span
               onClick={() => navigate("/dashboard")}
-              className='text-white font-bold text-2xl mx-2 cursor-pointer hover: text-gray-400'>
+              className={`text-white font-bold text-2xl mx-2 cursor-pointer hover: text-gray-400 ${navigation.state === "submitting" ? "pointer-events-none opacity-50" : "opacity-100"}`}>
               x
             </span>
           </div>
           <div className=' p-2 mx-2 mt-2'>
-            <p className='text-sm text-gray-400/80'>Expense</p>
-            <p className='text-2xl text-white font-bold leading-tight tracking-widest'>Add Expense</p>
+            <p className='text-sm text-gray-400/80'>{t("expense")}</p>
+            <p className='text-2xl text-white font-bold leading-tight tracking-widest'>{t("add-expense")}</p>
           </div>
         </div>
         <div className="add-expense-form w-full flex justify-center bg-trasparent items-start overflow-y-auto">
-          <Form method='post' className=' w-full max-w-lg space-y-2'>
+          <Form method='post' className={`w-full max-w-lg space-y-2 ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100"} `}>
             {
               error &&
               <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
@@ -102,14 +104,16 @@ const AddExpense = () => {
               </div>
             }
             <div className='flex flex-col gap-2 p-2'>
-              <label htmlFor="date" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>Transaction date</label>
+              <label htmlFor="date" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("transaction-date")}</label>
               <input
+                disabled={navigation.state === "submitting"}
                 name='monthYearDay'
                 type="date"
                 id="date"
-                className=' w-full border border-white/10 bg-slate-900/40 text-slate-100 p-3 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none'
+                className='w-full border border-white/10 bg-slate-900/40 text-slate-100 p-3 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none'
               />
               <input
+                disabled={navigation.state === "submitting"}
                 name='time'
                 type="time"
                 id="date"
@@ -117,8 +121,9 @@ const AddExpense = () => {
               />
             </div>
             <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
-              <label htmlFor="categoryId" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>Category</label>
+              <label htmlFor="categoryId" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("category")}</label>
               <select
+                disabled={navigation.state === "submitting"}
                 name='categoryId'
                 type="categoryId"
                 id="categoryId"
@@ -130,28 +135,30 @@ const AddExpense = () => {
                     value={category.id}
                     className=''
                   >
-                    {category.category}
+                    {t(category.category)}
                   </option>
                 })}
 
               </select>
             </div>
             <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
-              <label htmlFor="desc" className='text-md  uppercase tracking-wider text-blue-400 ml-1'>Description</label>
+              <label htmlFor="desc" className='text-md  uppercase tracking-wider text-blue-400 ml-1'>{t("description")}</label>
               <textarea
+                disabled={navigation.state === "submitting"}
                 name='description'
                 ref={textareaRef}
                 value={desc}
-                onChange={(e) => setDesc(e.target.value)}
+                onChange={(e) =>setDesc(e.target.value)}
                 type="text"
                 id='desc'
-                placeholder='Add a description of expense'
-                rows={4}
-                className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-4 rounded-xl focus:border-blue-500 outline-none min-h-[100px] resize-none transition-all' />
+                placeholder={t('add-description-expense')}
+                rows={1}
+                className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-4 rounded-xl focus:border-blue-500 outline-none resize-none max-h-[100px]' />
             </div>
             <div className='flex flex-col justify-start p-3 rounded-sm w-full'>
-              <label htmlFor="amount" className='font-semibold uppercase tracking-wider text-blue-400 ml-1'>Amount</label>
+              <label htmlFor="amount" className='font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("amount")}</label>
               <input
+                disabled={navigation.state === "submitting"}
                 name='amount'
                 type="number"
                 id="amount"
@@ -166,27 +173,36 @@ const AddExpense = () => {
                   <LuBanknote className="text-emerald-400" size={18} />
                 </div>
                 <label htmlFor="payment" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>
-                  Payment method
+                  {t("payment-method")}
                 </label>
               </div>
               <select
+                disabled={navigation.state === "submitting"}
                 name='payment'
                 id="payment"
                 className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none capitalize'
               >
-                <option value="cash" className="bg-slate-800">Cash</option>
-                <option value="card" className="bg-slate-800">Card</option>
+                <option value="cash" className="bg-slate-800">{t("cash")}</option>
+                <option value="card" className="bg-slate-800">{t("card")}</option>
               </select>
 
             </div>
             <div className='flex justify-center p-2'>
               <button
-                disabled={navigation.state === "submitting" ? true : false}
+                disabled={navigation.state === "submitting"}
                 type='submit'
                 className={`w-full ${navigation.state === "submitting" ? "bg-blue-400/30" : "bg-blue-600"} 
                 hover:bg-blue-500 text-white  font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/20 
                 transition-all flex justify-center items-center gap-2`}>
-                Save expense
+                {navigation.state === "submitting"
+                  ? (
+                    <span className='flex items-center justify-center gap-2'>
+                      <span className='animate-spin h-4 w-4 border-2 border-white border-b-transparent rounded-full'></span>
+                      {t("saving")}
+                    </span>
+                  )
+                  : t("save-expense")
+                }
               </button>
             </div>
           </Form>
@@ -197,8 +213,6 @@ const AddExpense = () => {
 }
 
 export const addExpenseAction = async ({ request }) => {
-  console.log("entered action");
-
   const data = await request.formData();
 
   const date = data.get("monthYearDay");

@@ -1,4 +1,5 @@
 package com.example.ExpenseTracker.service.Expense;
+import com.example.ExpenseTracker.dto.AddExpenseResDTO;
 import com.example.ExpenseTracker.dto.ExpenseReqDTO;
 import com.example.ExpenseTracker.dto.ExpenseResDTO;
 import com.example.ExpenseTracker.dto.MonthExpensesTotalInterface;
@@ -187,6 +188,8 @@ class ExpenseServiceImplTest {
                     expenseReqDTO.time()
             );
 
+            String key = "123gfdgfdg";
+
             when(userRepository.getReferenceById(userId)).thenReturn(user);
             when(expenseCatRepository.findById(categoryId))
                     .thenReturn(Optional.of(category));
@@ -196,13 +199,11 @@ class ExpenseServiceImplTest {
 
             doNothing().when(reportRepository).markReportStale(userId);
 
-            ExpenseResDTO result = expenseServiceImp
-                    .addExpense(expenseReqDTO, user.getId());
+            AddExpenseResDTO result = expenseServiceImp
+                    .addExpense(expenseReqDTO, user.getId(), key);
 
             assertNotNull(result);
-            assertEquals(expenseReqDTO.amount(), result.amount());
-            assertEquals(categoryId, result.categoryId());
-            assertEquals("Coffee", result.description());
+
 
             ArgumentCaptor<Expense> expenseCaptor = ArgumentCaptor.forClass(Expense.class);
             verify(expenseRepository).save(expenseCaptor.capture());
@@ -226,11 +227,12 @@ class ExpenseServiceImplTest {
 
         @Test
         void addExpense_NotValidCategory_throwException(){
+            String key = "123gfdgfdg";
             when(expenseCatRepository.findById(categoryId))
                     .thenReturn(Optional.empty());
 
             assertThrows(CategoryNotFoundException.class, () -> {
-                expenseServiceImp.addExpense(expenseReqDTO, userId);
+                expenseServiceImp.addExpense(expenseReqDTO, userId, key);
             });
 
 

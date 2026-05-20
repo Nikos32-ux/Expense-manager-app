@@ -6,6 +6,8 @@ import com.example.ExpenseTracker.model.ExpenseCategory;
 import com.example.ExpenseTracker.service.Expense.ExpenseService;
 import com.example.ExpenseTracker.util.UserContextUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/expenses")
+@Validated
 public class ExpenseController {
 
     private final ExpenseService expenseService;
@@ -95,12 +99,17 @@ public class ExpenseController {
     }
 
     @PostMapping("add_expense")
-    public ResponseEntity<ExpenseResDTO> addExpense(@Valid @RequestBody ExpenseReqDTO expenseReqDTO){
+    public ResponseEntity<AddExpenseResDTO> addExpense(
+            @Valid @RequestBody ExpenseReqDTO expenseReqDTO,
+            @RequestHeader("Idempotency-Key")
+            @NotBlank(message = "{idempotency.key.required}")
+            @Size(min = 10, max = 50, message = "{idempotency.key.required}")
+            String idempotencyKey){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
-        ExpenseResDTO savedExpense = expenseService.addExpense(expenseReqDTO, userId);
+        AddExpenseResDTO createExpenseStatus = expenseService.addExpense(expenseReqDTO, userId, idempotencyKey);
         return  ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(savedExpense);
+                .body(createExpenseStatus);
     }
 
     @PutMapping("update_expense/{expenseId}")

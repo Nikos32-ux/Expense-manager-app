@@ -1,23 +1,18 @@
 package com.example.ExpenseTracker.service.Expense;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.exception.CategoryNotFoundException;
-import com.example.ExpenseTracker.model.ExpenseCategory;
-import com.example.ExpenseTracker.repository.ExpenseCatRepository;
-import com.example.ExpenseTracker.repository.ReportRepository;
+import com.example.ExpenseTracker.model.*;
+import com.example.ExpenseTracker.repository.*;
 import com.example.ExpenseTracker.security.UserPrincipal;
 import com.example.ExpenseTracker.exception.ExpenseNotFoundException;
 import com.example.ExpenseTracker.exception.ResourceNotFoundException;
 import com.example.ExpenseTracker.mapper.ExpenseMapper;
-import com.example.ExpenseTracker.model.Expense;
-import com.example.ExpenseTracker.model.User;
-import com.example.ExpenseTracker.model.UserActionsCategory;
-import com.example.ExpenseTracker.repository.ExpenseRepository;
-import com.example.ExpenseTracker.repository.UserRepository;
 import com.example.ExpenseTracker.service.audit.AuditPublisher;
 import com.example.ExpenseTracker.specification.ExpenseSpecification;
 import com.example.ExpenseTracker.util.DateUtils;
 import com.example.ExpenseTracker.util.UserContextUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -32,10 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpenseServiceImp implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
@@ -43,6 +41,7 @@ public class ExpenseServiceImp implements ExpenseService {
     private final UserRepository userRepository;
     private final AuditPublisher auditPublisher;
     private final ReportRepository reportRepository;
+    private final IdempotencyRepository idempotencyRepository;
 
 
     public void checkOwnership(Long loggedInUserId, Long expenseOwnerId) {
@@ -96,9 +95,27 @@ public class ExpenseServiceImp implements ExpenseService {
             @CacheEvict(value = "reportData", key = "#userId"),
             @CacheEvict(value = "category-total-amount", key = "#userId")
     })
-    public ExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId) {
+    public AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String idempotencyKey) {
+         log.info("ADD_EXPENSE_REQUEST_RECEIVED userId={}, key={}", userId, idempotencyKey);
+
+        Optional<IdempotentRecords> record = idempotencyRepository.findByIdempotencyKey(idempotencyKey);
+
+        if(record.isPresent()){
+            log.info("RECORD_EXISTS_RETURN_STATUS userId={}, key={}", userId, idempotencyKey);
+            return new AddExpenseResDTO(record.get().getStatus());
+        }
+
+        int recordAdded = idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS");
+
+        if(recordAdded == 0){
+            log.info("DUPLICATE_REQUEST_BLOCKED_BY_CONFLICT userId={}, key={}", userId, idempotencyKey);
+            return new AddExpenseResDTO("IN_PROGRESS");
+        }
+
+        log.info("IDEMPOTENCY_WINNER_CONTINUING_BUSINESS_LOGIC userId={}, key={}", userId, idempotencyKey);
         ExpenseCategory category = expenseCatRepository.findById(expenseReqDTO.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException(expenseReqDTO.categoryId()));
+
         User refUser = userRepository.getReferenceById(userId);
         LocalDateTime localDateTime = LocalDateTime.of(expenseReqDTO.date(), expenseReqDTO.time());
 
@@ -107,12 +124,13 @@ public class ExpenseServiceImp implements ExpenseService {
         expense.setUser(refUser);
         expense.setCategory(category);
 
-        Expense savedExpense = expenseRepository.save(expense);
+        expenseRepository.save(expense);
+        idempotencyRepository.markRecordCompleted(idempotencyKey, "COMPLETED");
         reportRepository.markReportStale(userId);
 
         auditPublisher.publishEvent(refUser.getId(), UserActionsCategory.USER_CREATED_EXPENSE, "USER", now());
 
-        return ExpenseMapper.mapToDTO(savedExpense);
+        return new AddExpenseResDTO("COMPLETED");
     }
 
     @Override

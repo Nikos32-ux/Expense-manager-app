@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ExpenseService {
     Page<Expense> getExpenses(Long userId, Pageable pageable, ExpensesFilters filters);
-    ExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId);
+    AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String key);
     ExpenseResDTO updateExpense(Long id, ExpenseReqDTO expenseReqDTO, Long userId);
     void deleteExpense(Long id, Long userId);
     Expense getExpenseById(Long expenseId, Long UserId);

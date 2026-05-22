@@ -1,4 +1,4 @@
-import api from "../axiosClientApi/axios";
+import api from "../axiosClientApi/axios.js";
 
 
 export const runVerification = async () => {
@@ -9,6 +9,8 @@ export const runVerification = async () => {
 export const verifyUser = () => ({
     queryKey: ["verification"],
     queryFn: runVerification,
-    retry:false,
-    refetchOnWindowFocus: false
+    staleTime: 1000 * 60 * 1,
+    retry: false,
+    refetchOnWindowFocus: false,
+    meta: { persist: true }
 })

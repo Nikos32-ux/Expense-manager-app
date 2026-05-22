@@ -22,7 +22,8 @@ const LoginPage = () => {
         if (actionLoginData.success) {
             setSuccess(actionLoginData.success);
 
-            successTimer = setTimeout(() => {
+            successTimer = setTimeout
+            (() => {
                 setSuccess(false);
             }, 4000);
 
@@ -139,12 +140,20 @@ export const loginAction = async ({ request }) => {
     const password = formData.get("password");
 
     try {
-        if (!email.trim() || !password.trim()) {
-            return { error: "All fields are required" };
-        }
-        await api.post("/auth/login", { email, password });
+        if (!email.trim() || !password.trim()) return { error: "All fields are required" };
+        
+        let response = await api.post("/auth/login", { email, password });
+        queryClient.setQueryData(["verification"], response.data);
         return { success: "Login was successful" };
     } catch (error) {
+        if (error.response) {
+        console.error("DATA:", error.response.data);
+    } 
+    else if (error.request) {
+        console.error("NO_RESPONSE_RECEIVED", error.request);
+    }  else {
+        console.error("ERROR_MESSAGE:", error.message);
+    }
         return { error: "Login failed" };
     }
 };

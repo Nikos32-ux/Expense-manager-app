@@ -1,7 +1,7 @@
 import { redirect } from "react-router-dom";
-import api from "../axiosClientApi/axios";
 import { queryClient } from "../context/queryClient";
 import { verifyUser } from "../queries/authQuery";
+import api from "../axiosClientApi/axios";
 
 
 export const verificationLoader = async ({ request }) => {
@@ -13,23 +13,24 @@ export const verificationLoader = async ({ request }) => {
         path.startsWith("/categories")
     );
     const isPublicRoute = (
-        path === "/login" || 
-        path === "/register" || 
+        path === "/login" ||
+        path === "/register" ||
         path === "/"
     );
-    
-        try {
-        
-        
-        const user = await queryClient.ensureQueryData(verifyUser());
 
-        if(isPublicRoute && user){
-            return redirect("/dashboard");
-        }
-        
+    const cachedUser = queryClient.getQueryData(["verification"]);
+    console.log("cached", cachedUser);
+    
+    if (isPublicRoute){
+        if (cachedUser) return redirect("/dashboard");
+        return null;
+    }
+
+    try {
+        const user = await queryClient.ensureQueryData(verifyUser());
         return user;
     }
-    catch (error) {   
+    catch (error) {
         const status = error?.response?.status;
         const path = new URL(request.url).pathname;
 

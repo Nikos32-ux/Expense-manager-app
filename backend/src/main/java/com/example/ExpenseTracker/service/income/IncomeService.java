@@ -1,5 +1,6 @@
 package com.example.ExpenseTracker.service.income;
 import com.example.ExpenseTracker.dto.AddIncomeRequestDTO;
+import com.example.ExpenseTracker.dto.IncomeDataDTO;
 import com.example.ExpenseTracker.dto.IncomeResDTO;
 import com.example.ExpenseTracker.dto.MonthIncomeTotalInterface;
 import com.example.ExpenseTracker.model.IncomeCategory;
@@ -9,10 +10,10 @@ import java.util.List;
 
 
 public interface IncomeService {
-    public IncomeResDTO addIncome(AddIncomeRequestDTO incomeRequestDTO, Authentication auth);
-    public List<IncomeResDTO> getIncomes(Authentication auth);
+    public IncomeResDTO addIncome(AddIncomeRequestDTO incomeRequestDTO, Authentication auth, String key);
+    public List<IncomeDataDTO> getIncomes(Authentication auth);
 
-    IncomeResDTO getIncome(Long id ,Authentication auth);
+    IncomeDataDTO getIncome(Long id ,Authentication auth);
 
     public List<IncomeCategory> getCategories();
 

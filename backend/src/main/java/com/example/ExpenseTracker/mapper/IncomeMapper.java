@@ -1,6 +1,7 @@
 package com.example.ExpenseTracker.mapper;
 
 import com.example.ExpenseTracker.dto.AddIncomeRequestDTO;
+import com.example.ExpenseTracker.dto.IncomeDataDTO;
 import com.example.ExpenseTracker.dto.IncomeResDTO;
 import com.example.ExpenseTracker.model.Income;
 
@@ -14,13 +15,12 @@ final public class IncomeMapper {
         return income;
     }
 
-    public static IncomeResDTO toDTO(Income income){
-        IncomeResDTO incomeResDTO = new IncomeResDTO(
+    public static IncomeDataDTO toDTO(Income income){
+        return new IncomeDataDTO(
                 income.getId(),
                 income.getAmount(),
                 income.getSource(),
                 income.getDate()
         );
-        return incomeResDTO;
     }
 }

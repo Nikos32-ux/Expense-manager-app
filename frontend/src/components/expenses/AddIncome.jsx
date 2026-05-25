@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, Form, useActionData, useNavigation } from 'react-router-dom';
 import api from '../../axiosClientApi/axios';
 import { queryClient } from '../../context/queryClient';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const AddIncome = () => {
     const data = useActionData();
     const navigation = useNavigation();
+    const [idempotencyKey] = useState(() => uuidv4());
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -27,7 +29,7 @@ const AddIncome = () => {
         if (data?.success && startProcessRef.current === false) {
             startProcessRef.current = true;
             setSuccess(data?.success);
-            queryClient.invalidateQueries({ queryKey: ["month-income-total"]});
+            queryClient.invalidateQueries({ queryKey: ["month-income-total"] });
             successTimer = setTimeout(() => {
                 setSuccess(false);
             }, 4000);
@@ -114,6 +116,9 @@ const AddIncome = () => {
                                 className='h-full w-full border border-blue-400/20 bg-white/5 text-slate-100 p-2 rounded-sm'
                             />
                         </div>
+                        <div>
+                            <input type="hidden" name="idempotencyKey" defaultValue={idempotencyKey} />
+                        </div>
                         <div className='flex justify-center p-2'>
                             <button
                                 disabled={navigation.state === "submitting" ? true : false}
@@ -136,12 +141,19 @@ export const addIncomeAction = async ({ request }) => {
     const amount = data.get("amount");
     const date = data.get("date");
     const source = data.get("source")?.toUpperCase();
+    const key = data.get("idempotencyKey");
+  
+    
 
     if (!amount || !date || !source) return { error: "All fields are required" };
     if (Number(amount) < 0) return { error: "Insert a positive amount" };
 
     try {
-        const res = await api.post("/income/add-income", { amount, date, source });
+        const res = await api.post("/income/add-income", { amount, date, source },{
+             headers: {
+              'Idempotency-Key': key
+            }
+        });
         return { success: "Income added successfully!" };
     }
     catch (error) {

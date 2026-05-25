@@ -3,11 +3,14 @@ import { useNavigate, Form, useActionData, useNavigation } from 'react-router-do
 import api from '../../axiosClientApi/axios';
 import { queryClient } from '../../context/queryClient';
 import { v4 as uuidv4 } from 'uuid';
+import { useTranslation } from 'react-i18next';
+
 
 
 const AddIncome = () => {
     const data = useActionData();
     const navigation = useNavigation();
+    const {t} = useTranslation();
     const [idempotencyKey] = useState(() => uuidv4());
     const navigate = useNavigate();
     const [error, setError] = useState(null);
@@ -62,7 +65,7 @@ const AddIncome = () => {
                     <div>
                         <span
                             onClick={() => navigate("/dashboard")}
-                            className='text-white font-bold text-2xl mx-2 cursor-pointer hover: text-gray-400'>
+                            className={`text-white font-bold text-2xl mx-2 cursor-pointer hover: text-gray-400 ${navigation.state === "submitting" ? "pointer-events-none opacity-50" : "opacity-100"}`}>
                             x
                         </span>
                     </div>
@@ -73,7 +76,7 @@ const AddIncome = () => {
                 </div>
                 <div className="add-expense-form w-full flex justify-center items-center flex-1">
 
-                    <Form method="post" className=' h-full flex flex-col w-[80%] text-start gap-5 p-5'>
+                    <Form method="post" className={`h-full flex flex-col w-[80%] text-start gap-5 p-5 ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100" }`}>
                         {
                             error &&
                             <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
@@ -89,6 +92,7 @@ const AddIncome = () => {
                         <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
                             <label htmlFor="amount" className='text-md text-blue-400'>Amount</label>
                             <input
+                                disabled={navigation.state === "submitting"}
                                 name="amount"
                                 type="number"
                                 id="amount"
@@ -99,7 +103,7 @@ const AddIncome = () => {
                         </div>
                         <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
                             <label className='text-md text-blue-400' htmlFor="">Source of Income</label>
-                            <select name="source" className='h-full w-full bg-white/5 text-gray-800 p-2 border border-blue-400/20 rounded-sm'>
+                            <select disabled={navigation.state === "submitting"} name="source" className='h-full w-full bg-white/5 text-gray-800 p-2 border border-blue-400/20 rounded-sm'>
                                 <option value="">CATEGORY</option>
                                 <option value="salary">SALARY</option>
                                 <option value="freelance">FREELANCE</option>
@@ -110,6 +114,7 @@ const AddIncome = () => {
                         <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
                             <label htmlFor="date" className='text-md text-blue-400'>Date</label>
                             <input
+                                disabled={navigation.state === "submitting"}
                                 name="date"
                                 type="date"
                                 id="date"
@@ -123,8 +128,16 @@ const AddIncome = () => {
                             <button
                                 disabled={navigation.state === "submitting" ? true : false}
                                 type='submit'
-                                className={`${navigation.state === "submitting" ? "bg-blue-400/30" : "bg-blue-500"} shadow-2xl  text-white text-md active:scale-95 hover:bg-blue-600 p-2 rounded-md`}>
-                                {navigation.state === "submitting" ? "Saving income" : "Save Income"}
+                                className={`${navigation.state === "submitting" ? "bg-blue-400/30" : "bg-blue-600"} shadow-2xl  text-white text-md active:scale-95 hover:bg-blue-600 p-2 rounded-md`}>
+                                {navigation.state === "submitting"
+                                    ? (
+                                        <span className='flex items-center justify-center gap-2'>
+                                            <span className='animate-spin h-4 w-4 border-2 border-white border-b-transparent rounded-full'></span>
+                                            {t("saving")}
+                                        </span>
+                                    )
+                                    : t("save-expense")
+                                }
                             </button>
                         </div>
                     </Form>
@@ -142,16 +155,17 @@ export const addIncomeAction = async ({ request }) => {
     const date = data.get("date");
     const source = data.get("source")?.toUpperCase();
     const key = data.get("idempotencyKey");
-  
-    
+
+
 
     if (!amount || !date || !source) return { error: "All fields are required" };
     if (Number(amount) < 0) return { error: "Insert a positive amount" };
 
+  
     try {
-        const res = await api.post("/income/add-income", { amount, date, source },{
-             headers: {
-              'Idempotency-Key': key
+        const res = await api.post("/income/add-income", { amount, date, source }, {
+            headers: {
+                'Idempotency-Key': key
             }
         });
         return { success: "Income added successfully!" };

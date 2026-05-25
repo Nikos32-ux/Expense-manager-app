@@ -5,8 +5,6 @@ import { queryClient } from '../../context/queryClient';
 import { v4 as uuidv4 } from 'uuid';
 import { useTranslation } from 'react-i18next';
 
-
-
 const AddIncome = () => {
     const data = useActionData();
     const navigation = useNavigation();
@@ -24,22 +22,12 @@ const AddIncome = () => {
         }
 
         if (!data) return;
-
-        let successTimer;
         let errorTimer;
-        let navTimer;
 
         if (data?.success && startProcessRef.current === false) {
             startProcessRef.current = true;
-            setSuccess(data?.success);
             queryClient.invalidateQueries({ queryKey: ["month-income-total"] });
-            successTimer = setTimeout(() => {
-                setSuccess(false);
-            }, 4000);
-
-            navTimer = setTimeout(() => {
-                navigate("/dashboard");
-            }, 2000);
+                navigate("/dashboard", {state: {success: data.success}});
         } else if (data?.error) {
             setError(data?.error);
 
@@ -49,8 +37,6 @@ const AddIncome = () => {
         }
 
         return () => {
-            clearTimeout(successTimer);
-            clearTimeout(navTimer);
             clearTimeout(errorTimer);
         }
 
@@ -81,12 +67,6 @@ const AddIncome = () => {
                             error &&
                             <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
                                 <p className=' text-white text-[18px] font-semibold'>{error}</p>
-                            </div>
-                        }
-                        {
-                            success &&
-                            <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-green-600/20 backdrop-blur-xl text-center'>
-                                <p className=' text-white text-[18px] font-semibold'>{success}</p>
                             </div>
                         }
                         <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
@@ -128,7 +108,7 @@ const AddIncome = () => {
                             <button
                                 disabled={navigation.state === "submitting" ? true : false}
                                 type='submit'
-                                className={`${navigation.state === "submitting" ? "bg-blue-400/30" : "bg-blue-600"} shadow-2xl  text-white text-md active:scale-95 hover:bg-blue-600 p-2 rounded-md`}>
+                                className={`${navigation.state === "submitting" ? "bg-blue-400/30" : "bg-blue-600"} shadow-2xl text-white text-md active:scale-95 hover:bg-blue-600 p-2 rounded-md`}>
                                 {navigation.state === "submitting"
                                     ? (
                                         <span className='flex items-center justify-center gap-2'>
@@ -156,11 +136,8 @@ export const addIncomeAction = async ({ request }) => {
     const source = data.get("source")?.toUpperCase();
     const key = data.get("idempotencyKey");
 
-
-
     if (!amount || !date || !source) return { error: "All fields are required" };
     if (Number(amount) < 0) return { error: "Insert a positive amount" };
-
   
     try {
         const res = await api.post("/income/add-income", { amount, date, source }, {

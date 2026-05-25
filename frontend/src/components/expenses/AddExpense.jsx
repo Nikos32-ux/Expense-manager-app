@@ -38,13 +38,10 @@
         startProcessRef.current = false;
         return;
       }
-
       if (!data) return;
-
-      let successTimer;
+      
       let errorTimer;
-      let navTimer;
-
+      
       if (data?.success && startProcessRef.current === false) {
         startProcessRef.current = true;
         setSuccess(data?.success);
@@ -53,8 +50,7 @@
          queryClient.invalidateQueries(["month-expenses-total"]);
          queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"] });
          queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        successTimer = setTimeout(() => { setSuccess(false); }, 4000);
-        navTimer = setTimeout(() => { navigate("/dashboard"); }, 2000);
+         navigate("/dashboard", {state:{success: data?.success }});
 
       } else if (data?.error) {
         setError(data?.error);
@@ -63,8 +59,6 @@
 
 
       return () => {
-        clearTimeout(successTimer);
-        clearTimeout(navTimer);
         clearTimeout(errorTimer);
       }
 
@@ -99,12 +93,6 @@
                 error &&
                 <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-red-600/20 backdrop-blur-xl text-center'>
                   <p className=' text-white text-[18px] font-semibold'>{error}</p>
-                </div>
-              }
-              {
-                success &&
-                <div className='w-[80%] mx-auto rounded-md py-2 px-2 bg-green-600/20 backdrop-blur-xl text-center'>
-                  <p className=' text-white text-[18px] font-semibold'>{success}</p>
                 </div>
               }
               <div className='flex flex-col gap-2 p-2'>

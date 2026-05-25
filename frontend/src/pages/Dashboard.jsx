@@ -1,4 +1,4 @@
-import { Link, Outlet, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router-dom';
+import { Link, Outlet, useLoaderData, useLocation, useNavigate, useRouteLoaderData } from 'react-router-dom';
 import Navbar from '../components/ui/Navbar.jsx';
 import { useTranslation } from 'react-i18next'
 import AddExpense from '../components/expenses/AddExpense.jsx';
@@ -10,7 +10,7 @@ import Expense from '../components/expenses/Expense.jsx';
 import useAuth from '../hooks/useAuth';
 import * as LuIcons from "react-icons/lu";
 import { LuUser, LuBell, LuChevronLeft, LuSettings2, LuPlus, LuDownload, LuPanelTop, LuShieldCheck, LuLayoutGrid, LuWallet, LuFileUp, LuLogOut, LuFileText } from 'react-icons/lu';
-
+import toast from 'react-hot-toast';
 import LoadSpinner from '../components/ui/LoadSpinner.jsx';
 import { categories } from '../categories/categories.js';
 import { useContext, useEffect, useState } from 'react';
@@ -23,6 +23,7 @@ import { Client } from '@stomp/stompjs';
 
 const DashBoard = () => {
   const { data: user, isLoading, isSuccess } = useQuery(verifyUser());
+  const location = useLocation();
   const { notifications, setNotifications } = useContext(WebSocketContext);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -39,6 +40,11 @@ const DashBoard = () => {
     monthIncomeDataIsLoading
   } = useDashboard();
 
+  useEffect(() => {
+    if (!location?.state?.success) return;
+    toast.success(location.state.success);
+    navigate("/dashboard", { replace: true, state: {} });
+  }, [location, navigate]);
 
   const renderSkeletons = new Array(5).fill(null).map((_, i) => <ExpenseSkeleton key={i} />);
 
@@ -184,8 +190,8 @@ const DashBoard = () => {
                 <div>
                   <p className='text-xs uppercase tracking-widest text-gray-800/20 font-medium'>{t("income")}</p>
                   <p className='text-lg font-bold text-green-600/60'>
-                    {monthIncomeDataIsLoading || !monthIncomeData 
-                      ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" /> 
+                    {monthIncomeDataIsLoading || !monthIncomeData
+                      ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" />
                       : `$${monthIncomeData.incomeTotal}`}
                   </p>
                 </div>
@@ -198,8 +204,8 @@ const DashBoard = () => {
                   <p className='text-xs uppercase tracking-widest  text-gray-800/20 font-medium'>{t("expenses")}</p>
                   <p className='text-lg font-bold text-red-600/60'>
                     {monthExpensesDataIsLoading || !monthExpensesData
-                       ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" /> 
-                       : `$${monthExpensesData.amount}`}</p>
+                      ? <span className=" w-20 h-6 bg-gray-300/30 animate-pulse rounded" />
+                      : `$${monthExpensesData.amount}`}</p>
                 </div>
                 <Link to={"add-expense"}>
                   <LuPlus size={24} className='bg-red-500/30 text-red-500/30 border border-red-500/20 cursor-pointer hover:bg-red-400 transition-colors hover:text-white ml-2 rounded-full' />

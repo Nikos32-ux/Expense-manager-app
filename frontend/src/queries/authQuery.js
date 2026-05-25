@@ -9,7 +9,7 @@ export const runVerification = async () => {
 export const verifyUser = () => ({
     queryKey: ["verification"],
     queryFn: runVerification,
-    staleTime: 1000 * 60 * 1,
+    staleTime: 1000 * 60 * 5,
     retry: false,
     refetchOnWindowFocus: false,
     meta: { persist: true }

@@ -8,13 +8,12 @@ import LoadSpinner from '../components/ui/LoadSpinner';
 
 const PrivateRoutes = () => {
     const isRestoring = useIsRestoring();
-      
-      if(isRestoring) {
+    const {data: user, isError, error} = useQuery(verifyUser());
+    
+    if(isRestoring) {
         return <LoadSpinner/>;
       }
 
-    const {data: user, isError, error} = useQuery(verifyUser());
-    
     if(isError && error?.response?.status >= 500){
         return <RootErrorBoundary/>
     }

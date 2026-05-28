@@ -64,7 +64,6 @@ public class RateLimitingService {
     }
 
     public Bucket getOrCreateBucket(String key, String path){
-        System.out.println(buckets.estimatedSize());
         return buckets.get(key, k -> createBucket(k, path));
     }
 }

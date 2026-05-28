@@ -44,9 +44,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
-            log.debug("Request allowed for key: {}, remaining tokens: {}",
-                    key,
-                    probe.getRemainingTokens());
+            log.debug("Request allowed for key: {}, remaining tokens: {}", key, probe.getRemainingTokens());
             filter.doFilter(request, response);
             return;
         }
@@ -54,9 +52,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             long seconds = TimeUnit.NANOSECONDS.toSeconds(nanos);
             ObjectMapper objectMapper = new ObjectMapper();
 
-        log.warn("Rate limit exceeded for key: {}, retry after: {} seconds",
-                key,
-                seconds);
+        log.warn("Rate limit exceeded for key: {}, retry after: {} seconds", key, seconds);
             response.setStatus(429);
             response.setContentType("application/json");
             response.setHeader("Retry-After", String.valueOf(seconds));

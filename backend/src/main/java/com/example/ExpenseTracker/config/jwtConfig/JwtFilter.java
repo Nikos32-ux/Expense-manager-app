@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,10 +19,10 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtEntryPoint jwtEntryPoint;
     private final JwtFilterService jwtFilterService;
-    private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -44,12 +45,12 @@ public class JwtFilter extends OncePerRequestFilter {
            jwtFilterService.validateTokenAndUser(jwt);
        }
        catch(JwtException | UsernameNotFoundException ex){
-           logger.warn("JWT authentication failed for URI {}: ", request.getRequestURI());
+           log.warn("JWT authentication failed for URI {}: ", request.getRequestURI());
            jwtEntryPoint.commence(request, response, new BadCredentialsException("Invalid credentials"));
            return;
        }
        catch (Exception ex){
-           logger.error("Unexpected error during JWT validation for URI {}", request.getRequestURI());
+           log.error("Unexpected error during JWT validation for URI {}", request.getRequestURI());
            jwtEntryPoint.commence(request, response, new InternalAuthenticationServiceException("Internal server error during authentication"));
            return;
        }

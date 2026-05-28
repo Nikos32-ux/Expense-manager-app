@@ -9,6 +9,5 @@ import java.util.List;
 @Setter
 @ConfigurationProperties(prefix = "rate-limiting")
 public class RateLimitingProperties {
-
     List<Rule> rules;
 }

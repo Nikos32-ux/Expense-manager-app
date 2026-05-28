@@ -1,80 +1,76 @@
-spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: none
 
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db-changelog.sql
+  spring:
+    profiles:
+      active: ${SPRING_PROFILES_ACTIVE}
+    jpa:
+      open-in-view: false
+      hibernate:
+        ddl-auto: none
 
-  rabbitmq:
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 3000
-          max-attempts: 3
-          multiplier: 2.0
-        default-requeue-rejected: false
+    liquibase:
+      enabled: true
+      change-log: classpath:db/changelog/db-changelog.sql
 
-management:
-  metrics:
-    distribution:
-      percentiles:
-        http:
-          server:
-            requests: 0.5,0.95,0.99
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
+    rabbitmq:
+      listener:
+        simple:
+          retry:
+            enabled: true
+            initial-interval: 3000
+            max-attempts: 3
+            multiplier: 2.0
+          default-requeue-rejected: false
 
-logging:
-  level:
-    org:
-      hibernate: WARN
-      springframework:
-        jdbc: WARN
-    liquibase: WARN
+  management:
+    metrics:
+      distribution:
+        percentiles:
+          http:
+            server:
+              requests: 0.5,0.95,0.99
+        percentiles-histogram:
+          http:
+            server:
+              requests: true
 
 
-rate-limiting:
-  rules:
-    - path: "/auth/login"
-      capacity: 10
-      refillTokens: 5
-      refillMinutes: 15
+  rate-limiting:
+    rules:
+      - path: "/auth/login"
+        capacity: 10
+        refillTokens: 5
+        refillMinutes: 15
 
-    - path: "/auth/register"
-      capacity: 8
+      - path: "/auth/register"
+        capacity: 8
+        refillTokens: 1
+        refillMinutes: 30
 
-      refillTokens: 1
-      refillMinutes: 30
+      - path: "/auth/update-account-info"
+        capacity: 5
+        refillTokens: 1
+        refillMinutes: 20
 
-    - path: "/auth/update-account-info"
-      capacity: 5
-      refillTokens: 1
-      refillMinutes: 20
+      - path: "/auth/update-password"
+        capacity: 3
+        refillTokens: 1
+        refillMinutes: 60
 
-    - path: "/auth/update-password"
-      capacity: 3
-      refillTokens: 1
-      refillMinutes: 60
+      - path: "/auth/user-verify"
+        capacity: 60
+        refillTokens: 20
+        refillMinutes: 10
 
-    - path: "/auth/user-verify"
-      capacity: 60
-      refillTokens: 20
-      refillMinutes: 10
+      - path: "/report/generate-report"
+        capacity: 3
+        refillTokens: 2
+        refillMinutes: 60
 
-    - path: "/report/generate-report"
-      capacity: 3
-      refillTokens: 2
-      refillMinutes: 60
+      - path: "DEFAULT"
+        capacity: 60
+        refillTokens: 5
+        refillMinutes: 10
 
-    - path: "DEFAULT"
-      capacity: 60
-      refillTokens: 5
-      refillMinutes: 10
+
+
+

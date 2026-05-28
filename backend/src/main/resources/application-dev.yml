@@ -1,36 +1,53 @@
-spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
 
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  spring:
+    datasource:
+      url: ${SPRING_DATASOURCE_URL}
+      username: ${SPRING_DATASOURCE_USERNAME}
+      password: ${SPRING_DATASOURCE_PASSWORD}
+    jpa:
+      show-sql: false
+      level:
+      properties:
+        hibernate:
+          format_sql: true
 
-jwt:
-  secret: ${JWT_SECRET}
+  jwt:
+    secret: ${JWT_SECRET}
 
-management:
-  endpoint:
-    health:
-      show-details: always
+  management:
+    endpoint:
+      startup:
+        enabled: true
+      health:
+        show-details: always
+    endpoints:
+      web:
+        exposure:
+          include: "health,metrics,beans,startup"
 
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+  cloudinary:
+    cloud_name: ${CLOUDINARY_CLOUD_NAME}
+    api_key: ${CLOUDINARY_API_KEY}
+    api_secret: ${CLOUDINARY_API_SECRET}
 
-cloudinary:
-  cloud_name: ${CLOUDINARY_CLOUD_NAME}
-  api_key: ${CLOUDINARY_API_KEY}
-  api_secret: ${CLOUDINARY_API_SECRET}
 
-logging:
-  level:
-    org.springframework.cache: DEBUG
-    org.springframework.cache.interceptor: TRACE
-    org.springframework.security.web.FilterChainProxy: DEBUG
-    com.example.ExpenseTracker: DEBUG
+  logging:
+    level:
+      root: INFO
+      org.hibernate: WARN
+      org.springframework.jdbc: WARN
+      liquibase: INFO
+      org.hibernate.SQL: DEBUG
+      org.hibernate.orm.jdbc.bind: TRACE
+      org.hibernate.stat: DEBUG
+      com.example.ExpenseTracker: DEBUG
+      com.zaxxer.hikari: DEBUG
+
+
+    tomcat:
+      accesslog:
+        enabled: true
+        directory: C:/Users/USER/Expense-manager-app/backend/logs
+        prefix: access_log
+        suffix: .log
+        pattern: "%h %l %u %t \"%r\" %s %b %D"

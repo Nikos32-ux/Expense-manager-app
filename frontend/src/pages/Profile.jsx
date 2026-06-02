@@ -182,8 +182,8 @@ const Profile = () => {
           }
 
         </div>
-        <div className="settings-container bg-gray-50 flex flex-col h-full p-4 flex-1 overflow-auto-y -mt-4">
-          <div className='pt-8 w-full mt-3'>
+        <div className="settings-container bg-gray-50 flex flex-col h-full p-3 flex-1 overflow-auto-y -mt-4">
+          <div className='pt-4 w-full mt-2 mb-2'>
             {isLoading ? (
               <div className="mx-auto text-center mt-6 space-y-3">
                 <div className="h-8 w-40 bg-gray-300 animate-pulse rounded-md mx-auto" />
@@ -191,42 +191,42 @@ const Profile = () => {
               </div>
             ) : (
               <div className="mx-auto text-center text-gray-900">
-                <p className="text-3xl font-bold italic">{user.username}</p>
-                <p className="text-lg text-blue-400">{user.email}</p>
+                <p className="text-2xl font-bold italic">{user.username}</p>
+                <p className="text-md text-blue-400">{user.email}</p>
               </div>
             )}
           </div>
-          <div className="settings-list w-[90%]  mx-auto py-5 text-center p-4 flex flex-col gap-5">
+          <div className="settings-list w-[90%]  mx-auto py-5 text-center p-3 flex flex-col gap-3">
             <Link
               to={"account-info"}
-              className=' flex items-center gap-4 p-4  bg-white shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'
+              className='flex items-center gap-3 px-4 py-3 w-full bg-white rounded-xl border border-gray-100 hover:bg-red-50'
             >
               <LuUser size={24} className='text-blue-600' />
               <p className='text-lg font-medium text-gray-800'>{t("account-info")}</p>
             </Link>
             <Link
               to={"security"}
-              className='flex items-center bg-white gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
+              className='flex items-center gap-3 px-4 py-3 w-full bg-white rounded-xl border border-gray-100 hover:bg-red-50'>
               <LuShieldCheck size={24} className='text-blue-600' />
               <p className='text-lg font-medium text-gray-800'>{t("security")}</p>
             </Link>
             <button
               onClick={() => handleReportCall()}
               disabled={exportFileisPending ? true : false}
-              className='flex items-center bg-white gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
+              className='flex items-center gap-3 px-4 py-3 w-full bg-white rounded-xl border border-gray-100 hover:bg-red-50'>
               <LuFileUp size={24} className='text-blue-600' />
               <span className='text-lg font-medium text-gray-800'>
                 {t("data-export")}
               </span>
             </button>
-            <div className='flex items-center  gap-4 p-4 shadow hover:shadow-lg transition-shadow duration-200 rounded-sm'>
+            <button className='flex items-center gap-3 px-4 py-3 w-full bg-white rounded-xl border border-gray-100 hover:bg-red-50'>
               <LuLogOut size={24} className='text-red-600' />
               <p className='text-lg font-medium text-red-700'>{t("logout")}</p>
-            </div>
+            </button>
           </div>
         </div>
       </div>
-      <div className="lg:hidden shrink-0">
+      <div className=" fixed bottom-0 right-0 left-0 z-50 lg:hidden">
         <Navbar />
       </div>
       <Outlet />

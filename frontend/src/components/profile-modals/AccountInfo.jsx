@@ -80,7 +80,7 @@ const AccountInfo = () => {
 lg:left-72 lg:w-[calc(100%-18rem)]'>
             <div ref={modalRef} className="account-info-container bg-white w-full max-w-auto h-[60vh] fixed bottom-0 rounded-t-2xl openExpenseDetail">
                 <h1 className='text-center uppercase font-bold text-xl text-blue-500 mt-3'>{t("profile")}</h1>
-                <div className="language flex flex-col p-4 mb-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="language flex flex-col bg-gray-50 rounded-xl border border-gray-100">
                     <label htmlFor="language" className='text-gray-500 text-xs uppercase tracking-wider font-bold mb-3'>
                         {t('language')}
                     </label>
@@ -118,33 +118,33 @@ lg:left-72 lg:w-[calc(100%-18rem)]'>
                         </button>
                     </div>
                 </div>
-                <div className="personal-info h-full w-full px-3 p-4 gap-6">
-                    <div className="name mb-3 mt-4 flex items-center justify-between mx-auto shadow-md p-1 bg-white rounded-lg">
-                        <div className='flex flex-col w-full mb-4'>
-                            <label htmlFor="name" className='text-gray-500 text-sm mb-1 font-medium'>{t('username')}</label>
+                <div className="personal-info flex flex-col px-3 p-4 gap-3">
+                    <div className="name flex w-full items-center justify-between mx-auto shadow-md rounded-md mb-0">
+                        <div className='flex flex-col w-full h-full mt-0'>
+                           <label htmlFor="name" className='text-gray-500 text-sm mb-1 font-medium '>{t('Username')}</label>
                             <input
                                 onChange={(e) => setDraftContent(prev => ({ ...prev, username: e.target.value }))}
                                 type="text"
                                 readOnly={isUsernameEdit ? false : true}
                                 ref={usernameRef}
                                 value={isUsernameEdit ? draftContent.username : user.username}
-                                className="bg-white/80 backdrop-blur-sm shadow-sm text-gray-800 font-semibold text-lg rounded-md px-3 py-2 border-none outline-none "
+                                className="bg-white/80 backdrop-blur-sm shadow-sm text-gray-800 font-semibold text-md rounded-md px-3 py-2 border-none outline-none "
                             />
                         </div>
-                        <div className=' mt-5 mr-2'>
+                        <div className=' mt-2 mr-2'>
                             <LuPencilLine size={20} className='text-gray-900 active:scale-125' onClick={() => setIsUsernameEdit(true)} />
                         </div>
                     </div>
-                    <div className="email flex items-center justify-between mx-auto shadow-md p-1 bg-white rounded-lg mb-3">
-                        <div className='flex flex-col'>
-                            <label htmlFor="name" className='text-gray-500 text-sm mb-1 font-medium'>{t('email')}</label>
+                    <div className="email w-full flex items-center justify-between mx-auto shadow-md rounded-md mb-0">
+                        <div className='flex flex-col  w-full mb-2 h-full mt-0'>
+                            <label htmlFor="email" className='text-gray-500 text-sm mb-1 font-medium '>{t('email')}</label>
                             <input
                                 onChange={(e) => setDraftContent(prev => ({ ...prev, email: e.target.value }))}
                                 type="text"
                                 readOnly={isEmailEdit ? false : true}
                                 ref={emailRef}
                                 value={isEmailEdit ? draftContent.email : user.email}
-                                className="bg-white/80 backdrop-blur-sm shadow-sm text-gray-800 font-semibold text-lg rounded-md px-3 py-2 border-none outline-none"
+                                className="bg-white/80 backdrop-blur-sm shadow-sm text-gray-800 font-semibold text-md rounded-md px-3 py-2 border-none outline-none"
                             />
                         </div>
                         <div className=' mt-5 mr-2'>
@@ -155,7 +155,7 @@ lg:left-72 lg:w-[calc(100%-18rem)]'>
                         <button
                             onClick={() => applyAccountUpdatedInfo(draftContent)}
                             disabled={updateAccountIsPending}
-                            className={`${updateAccountIsPending ? "hover:bg-blue-200" : "bg-blue-400 "} text-white font-bold w-full rounded-xl lg:max-w-[200px] text-bold tracking-widest text-lg transition-all duration-200 p-3 mt-5`}>
+                            className={`${updateAccountIsPending ? "hover:bg-blue-200" : "bg-blue-400 "} text-white font-bold w-full rounded-md w lg:max-w-[200px] text-bold tracking-widest text-sm transition-all duration-200 p-3 mt-3`}>
                             {!updateAccountIsPending ? t('update') : "Updating..."}
                         </button>
                     </div>

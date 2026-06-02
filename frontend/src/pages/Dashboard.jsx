@@ -73,7 +73,7 @@ const DashBoard = () => {
 
   return (
     <>
-      <div className='h-screen flex flex-col lg:flex-row bg-white'>
+      <div className='h-[100dvh] flex flex-col overflow-hidden lg:flex-row bg-white'>
 
         <aside className="hidden lg:flex lg:w-72 lg:flex-col bg-slate-950 text-white shrink-0 border-r border-white/5 relative overflow-hidden 
                             bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900
@@ -127,8 +127,8 @@ const DashBoard = () => {
             </div>
           </div>
         </aside>
-        <div className="flex flex-col flex-1">
-          <div className='header pt-2 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.6)),url("/login-page.jpg")] bg-cover bg-center h-[30vh] max-h-[30vh]'>
+        <div className="flex flex-col h-full">
+          <div className='header pt-2 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.6)),url("/login-page.jpg")] bg-cover bg-center h-[30vh] max-h-[25vh]'>
             {isLoading
               ? (
                 <div className="flex justify-between px-5 mt-5 animate-pulse">
@@ -173,7 +173,7 @@ const DashBoard = () => {
             }
 
           </div>
-          <div className="card bg-blue-300/20 w-[90%] mx-auto lg:max-w-4xl items-start rounded-xl backdrop-blur-md shadow-2xl -mt-20 mb-10">
+          <div className="card bg-blue-300/20 w-[90%] mx-auto lg:max-w-4xl items-start rounded-xl backdrop-blur-md shadow-2xl -mt-20 mb-2">
             {showDeletedSuccess &&
               (<div className='w-[70%] mx-auto bg-green-600 p-2 rounded-md shadow-lg fadeInSuccess'>
                 <h1 className='text-white font-semibold text-lg'>{t("delete-success")}
@@ -213,18 +213,18 @@ const DashBoard = () => {
               </div>
             </div>
           </div>
-          <div className='transaction-container bg-gray-100/10 shadow-md flex-1 overflow-y-auto rounded-t-lg'>
+          <div className='transaction-container bg-gray-100/10 shadow-md flex-1 rounded-t-lg flex flex-col min-h-0 '>
             <div className='transaction-render '>
               <div className='flex items-center justify-between px-2'>
                 <h1 className='text-gray-800/80 font-semibold text-md tracking-widest italic ml-2'>{t("recent-transactions")}</h1>
                 <Link to={"/transactions"} className='text-gray-500 font-medium text-sm hover:text-blue-600 transition-colors mr-2'>{t("view-all")}</Link>
               </div>
-              <div className={`expenses-list w-full mt-4 flex flex-col gap-3 pb-3`}>
-                {expenseListIsLoading ? renderSkeletons : renderExpenses()}
-              </div>
+            </div>
+            <div className={`expenses-list w-full mt-4 flex flex-1 flex-col gap-3 pb-3 overflow-y-auto`}>
+              {expenseListIsLoading ? renderSkeletons : renderExpenses()}
             </div>
           </div>
-          <div className="lg:hidden">
+          <div className=" fixed bottom-0 right-0 left-0 z-50 lg:hidden">
             <Navbar />
           </div>
         </div>

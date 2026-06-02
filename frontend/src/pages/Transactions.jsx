@@ -246,7 +246,7 @@ const Transactions = () => {
           </div>
         </div>
       </aside>
-       <main className='flex-1 flex flex-col h-full overflow-hidden relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950'>
+      <main className='flex-1 flex flex-col h-full overflow-hidden relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950'>
         <section className='transactions-top-part flex flex-col items-center pt-2 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.2)),url("/login-page.jpg")] bg-cover bg-center shrink-0 min-h-[250px] lg:min-h-[300px]'>
           <h1 className='text-white font-bold text-xl tracking-widest'>{t("transactions")}</h1>
 
@@ -333,7 +333,7 @@ const Transactions = () => {
 
       <Outlet categories={categories} />
 
-      <div className="lg:hidden shrink-0">
+      <div className=" fixed bottom-0 right-0 left-0 z-50 lg:hidden">
         <Navbar />
       </div>
     </div>

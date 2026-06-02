@@ -118,14 +118,12 @@ const ExpenseDetail = () => {
             </div>
           </div>
         </div>
-        <div className='card-info-container relative flex flex-col justify-around flex-1 bg-white p-2 '>
+        <div className='card-info-container relative flex flex-col justify-around flex-1 overflow-y-auto min-h-0 bg-white p-2 '>
           {updateExpenseSuccess && (
             <div className="fadeInSuccess absolute  -top-10 self-center bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-fadeInOut z-50">
               <h1 className='text-center'> Updated successfully!</h1>
             </div>
           )}
-
-
           {updateExpensePending
             ? (
               <div className="flex items-center justify-center h-screen">
@@ -270,7 +268,7 @@ const ExpenseDetail = () => {
               </div>
             )
             : (
-              <div className="edit-delete-btns flex gap-2 justify-around p-2">
+              <div className="sticky bottom-0 edit-delete-btns flex gap-2 justify-around p-2">
                 <button className='bg-gradient-to-b from-teal-300 to-teal-500 flex justify-center p-2 items-center flex-1 rounded-md'>
                   <LuSquarePen className='text-white-600 mr-2 font-bold' />
                   <span onClick={() => setIsEditMode(true)} className='text-white text-md font-semibold '>
@@ -287,7 +285,6 @@ const ExpenseDetail = () => {
 
         </div>
       </div >
-
     </div >
   )
 }

@@ -10,7 +10,7 @@ import { ExpenseDetailContext } from "./ExpenseDetailContext";
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
-    const authUser = useRouteLoaderData("root");
+    const authUser = queryClient.getQueryData(["verification"]);
     const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
     
     const getNotifications = async () => {    

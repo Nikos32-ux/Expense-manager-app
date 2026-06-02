@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-expense-tracker")
-                .setAllowedOrigins("http://localhost:5173", "http://localhost");
+                .setAllowedOrigins("http://localhost:5173", "http://localhost", "http://13.60.59.29",  "http://192.168.1.171:5173");
     }
 
 }

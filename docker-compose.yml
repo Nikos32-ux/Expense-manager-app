@@ -30,7 +30,7 @@ services:
       start_period: 60s
 
   nginx:
-    image: expense-gateway:latest
+    image: nikosdev/expense-gateway:latest
     container_name: global-proxy
     ports:
       - "80:80"
@@ -39,7 +39,7 @@ services:
         condition: service_started
 
   expense-app:
-    image: expense-tracker:latest
+    image: nikosdev/expense-tracker:latest
     container_name: expense-app
     depends_on:
       postgres:
@@ -55,4 +55,8 @@ services:
 
 volumes:
   postgres-data:
+    external: true
+    name: expense-manager-app_postgres-data
   rabbitmq-data:
+    external: true
+    name: expense-manager-app_rabbitmq-data

@@ -6,7 +6,6 @@
       password: ${SPRING_DATASOURCE_PASSWORD}
     jpa:
       show-sql: false
-      level:
       properties:
         hibernate:
           format_sql: true
@@ -37,13 +36,11 @@
       org.hibernate: WARN
       org.springframework.jdbc: WARN
       liquibase: INFO
-      org.hibernate.SQL: DEBUG
-      org.hibernate.orm.jdbc.bind: TRACE
-      org.hibernate.stat: DEBUG
       com.example.ExpenseTracker: DEBUG
-      com.zaxxer.hikari: DEBUG
+      com.zaxxer.hikari: INFO
 
 
+  server:
     tomcat:
       accesslog:
         enabled: true

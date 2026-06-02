@@ -10,6 +10,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,13 @@ public class ControllerValidation {
         });
         GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(400, listErrors, LocalDate.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);
+    }
+
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<GlobalExceptionRes<String>> handleImageSizeException(MaxUploadSizeExceededException ex){
+        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(413,"The uploaded file is too large! Maximum allowed size is 5MB", LocalDate.now());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(exceptionRes);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

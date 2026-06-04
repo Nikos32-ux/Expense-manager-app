@@ -1,4 +1,4 @@
-import { Link, Outlet, useLoaderData, useLocation, useNavigate, useRouteLoaderData } from 'react-router-dom';
+import { Link, Outlet, useLoaderData, useLocation, useNavigate, useOutletContext, useRouteLoaderData } from 'react-router-dom';
 import Navbar from '../components/ui/Navbar.jsx';
 import { useTranslation } from 'react-i18next'
 import AddExpense from '../components/expenses/AddExpense.jsx';
@@ -22,7 +22,8 @@ import { Client } from '@stomp/stompjs';
 
 
 const DashBoard = () => {
-  const { data: user, isLoading, isSuccess } = useQuery(verifyUser());
+  
+  const { user, isLoading } = useOutletContext();
   const location = useLocation();
   const { notifications, setNotifications } = useContext(WebSocketContext);
   const { t, i18n } = useTranslation();
@@ -147,9 +148,9 @@ const DashBoard = () => {
                 <div className=' flex justify-between px-5  mt-5'>
                   <div className='flex justify-between items-center'>
                     <div className='w-12 h-12 border-2 border-blue-500 rounded-full'>
-                      <img src={user.imageProfile} className=' w-full h-full rounded-full object-cover' alt="" />
+                      <img src={user?.imageProfile} className=' w-full h-full rounded-full object-cover' alt="" />
                     </div>
-                    <p className='text-blue-400 ml-3 w-[120px] font-bold tracking-wider text-sm'>{t("welcome-back")}, <span className='text-white text-lg leading-tight'>{user.username}</span></p>
+                    <p className='text-blue-400 ml-3 w-[120px] font-bold tracking-wider text-sm'>{t("welcome-back")}, <span className='text-white text-lg leading-tight'>{user?.username}</span></p>
                   </div>
                   <div className='flex items-center gap-1'>
                     <button onClick={() => {
@@ -213,7 +214,7 @@ const DashBoard = () => {
               </div>
             </div>
           </div>
-          <div className='transaction-container bg-gray-100/10 shadow-md flex-1 rounded-t-lg flex flex-col min-h-0 '>
+          <div className='transaction-container bg-gray-100/10 shadow-md flex-1 rounded-t-lg flex flex-col min-h-0 mb-12 '>
             <div className='transaction-render '>
               <div className='flex items-center justify-between px-2'>
                 <h1 className='text-gray-800/80 font-semibold text-md tracking-widest italic ml-2'>{t("recent-transactions")}</h1>

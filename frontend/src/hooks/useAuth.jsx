@@ -8,14 +8,19 @@ const useAuth = () => {
     const navigate = useNavigate();
 
     const logout = async () => {
+        
         const res = await api.post("/auth/logout")
     }
 
     const mutation = useMutation({
         mutationFn: logout,
         onSuccess: () => {
-            window.localStorage.removeItem('REACT_QUERY_OFFLINE_CACHE');
-            window.location.replace("/login")
+            queryClient.removeQueries({ queryKey: ["verification"] });
+
+            localStorage.removeItem("REACT_QUERY_OFFLINE_CACHE");
+
+            window.location.replace("/login");
+            
         }
     })
 

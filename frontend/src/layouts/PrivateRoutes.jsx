@@ -8,7 +8,7 @@ import LoadSpinner from '../components/ui/LoadSpinner';
 
 const PrivateRoutes = () => {
     const isRestoring = useIsRestoring();
-    const {data: user, isError, error} = useQuery(verifyUser());
+    const {data: user, isError, error, isLoading} = useQuery(verifyUser());
     
     if(isRestoring) {
         return <LoadSpinner/>;
@@ -24,7 +24,7 @@ const PrivateRoutes = () => {
 
     if(!user) return <Navigate to="/login" />
 
-    return <Outlet/>;
+    return <Outlet context={{user, isLoading}}/>;
 }
 
 export default PrivateRoutes

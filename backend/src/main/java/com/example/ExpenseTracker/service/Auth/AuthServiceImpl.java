@@ -78,10 +78,7 @@ public class AuthServiceImpl implements AuthService {
                 now()
         );
 
-       return new RegisterResDTO(
-               "success",
-               savedUser.getUsername(),
-               savedUser.getEmail());
+       return new RegisterResDTO( "Registration was successful");
     };
 
     @Override
@@ -147,10 +144,6 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(convertedPassword);
         cache.invalidate(user.getEmail());
-        return new UpdatePasswordResDTO(
-                "Updated password successfully",
-                user.getUsername(),
-                user.getEmail()
-        );
+        return new UpdatePasswordResDTO("success","Updated password successfully");
     }
 }

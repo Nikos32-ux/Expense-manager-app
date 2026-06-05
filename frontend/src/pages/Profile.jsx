@@ -57,7 +57,7 @@ const Profile = () => {
   }
 
   return (
-    <div className='h-[100dvh] w-full flex flex-col overflow-hidden lg:flex-row'>
+    <div className='h-screen w-full flex flex-col overflow-hidden lg:flex-row'>
       <aside className="hidden lg:flex lg:w-72 lg:flex-col bg-slate-950 text-white shrink-0 border-r border-white/5 relative overflow-hidden 
                     bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900
                     shadow-2xl shadow-black/40">

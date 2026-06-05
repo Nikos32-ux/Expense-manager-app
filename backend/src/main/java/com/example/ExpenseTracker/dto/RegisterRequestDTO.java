@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public record RegisterRequestDTO(
         @NotBlank(message="{register.username.notBlank}")
-        @Size(min=3, max=10, message="{register.username.size}")
+        @Size(min=6, max=20, message="{register.username.size}")
         String username,
 
         @NotBlank(message ="{register.email.notBlank}" )
@@ -16,7 +16,7 @@ public record RegisterRequestDTO(
         String email,
 
         @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,12}$",
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z@$!%*?&]{8,25}$",
                 message = "{register.password.pattern}"
         )
         @NotBlank(message="{register.password.notBlank}")

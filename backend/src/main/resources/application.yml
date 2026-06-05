@@ -56,7 +56,7 @@
         refillMinutes: 20
 
       - path: "/auth/update-password"
-        capacity: 3
+        capacity: 5
         refillTokens: 1
         refillMinutes: 60
 

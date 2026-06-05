@@ -1,7 +1,4 @@
 package com.example.ExpenseTracker.dto;
 
-public record UpdatePasswordResDTO(
-        String message,
-        String username,
-        String email) {
-}
+public record UpdatePasswordResDTO(String status, String message) {}
+

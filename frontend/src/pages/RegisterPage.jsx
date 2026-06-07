@@ -5,24 +5,24 @@ import api from '../axiosClientApi/axios.js';
 import { checkPassRules } from '../utils/validatePassword.js'
 
 
-
 const RegisterPage = () => {
-
   const actionLoginData = useActionData();
   const navigation = useNavigation();
   const [imageProfile, setImageProfile] = useState(null);
   const [newPassword, setNewPassword] = useState("");
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
   const [fieldErrors, setFieldErrors] = useState(null);
   const [serverErrors, setServerErrors] = useState(null);
   const [generalErrors, setgeneraErrors] = useState(null);
-
+  const [showUsernameRules, setShowUsernameRules] = useState(false);
+  const [showPasswordRules, setShowPasswordRules] = useState(false);
 
   useEffect(() => {
     if (!actionLoginData || navigation.state === "submitting") return;
     let errorTimer;
 
-    if (actionLoginData?.data) navigate("/login", {state: {success: actionLoginData.data.message}});
+    if (actionLoginData?.data) navigate("/login", { state: { success: actionLoginData.data.message } });
 
     else if (actionLoginData?.generalErrors) {
       console.log("general errors", actionLoginData.generalErrors);
@@ -32,14 +32,14 @@ const RegisterPage = () => {
         setgeneraErrors(false);
       }, 3000);
 
-    } else if(actionLoginData?.fieldErrors) {
+    } else if (actionLoginData?.fieldErrors) {
       console.log("field errors", actionLoginData.fieldErrors);
       setFieldErrors(actionLoginData?.fieldErrors);
 
       errorTimer = setTimeout(() => {
         setFieldErrors(false);
       }, 3000);
-    }else if(actionLoginData?.serverErrors) {
+    } else if (actionLoginData?.serverErrors) {
       console.log("server errors", actionLoginData.serverErrors);
       setServerErrors(actionLoginData?.serverErrors);
 
@@ -54,7 +54,7 @@ const RegisterPage = () => {
   }, [actionLoginData, navigation])
 
 
-
+  const usernameRule = username.length > 6 && username.length < 20;
   const passwordRules = useMemo(() => checkPassRules(newPassword), [newPassword]);
 
   return (
@@ -81,7 +81,7 @@ const RegisterPage = () => {
 
         <Form method='post' encType="multipart/form-data"
           className={`register-form flex flex-col flex-1 items-center lg:w-[450px] ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
-         
+
           {(serverErrors || generalErrors) && (
             <div className='w-[90%] mx-auto'>
               <p className='text-red-400 text-sm font-medium text-center'>{serverErrors || generalErrors}</p>
@@ -94,40 +94,51 @@ const RegisterPage = () => {
               <input
                 name='username'
                 autoComplete="nickname"
+                onChange={(e) => setUsername(e.target.value)}
+                onFocus={() => setShowUsernameRules(true)}
                 className='w-full bg-transparent text-white placeholder:text-gray-500 outline-none'
                 type="text"
                 placeholder='Name'
               />
             </div>
+            {showUsernameRules &&
+              <div className='flex items-center self-start gap-2 text-sm'>
+                <div className={`rounded-full  h-4 w-4 flex items-center justify-center transition-colors ${usernameRule ? "bg-emerald-500" : "bg-gray-300"} `}>
+                  {usernameRule && <span className='self-start className="text-[10px] text-white"'>✓</span>}
+                </div>
+                <p className={usernameRule ? "text-emerald-500" : "text-gray-400 "}>3 to 25 characters</p>
+              </div>
+            }
             {fieldErrors?.username && (
-            <div className='w-[90%] mx-auto'>
-              <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.username}</p>
-            </div>
-          ) }
+              <div className='w-[90%] mx-auto'>
+                <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.username}</p>
+              </div>
+            )}
 
             <div className='w-full bg-gray-800/50 border border-white/20 rounded-xl backdrop-blur-md p-3 flex items-center gap-3 focus-within:ring-2 focus-within:ring-blue-500 transition-all'>
               <LuLock className='text-blue-400 w-5 h-5 flex-shrink-0' />
               <input
                 name='password'
                 autoComplete="pass"
+                onFocus={() => setShowPasswordRules(true)}
                 className='w-full bg-transparent text-white placeholder:text-gray-500 outline-none'
                 onChange={(e) => { setNewPassword(e.target.value) }}
                 type="text"
                 placeholder='Password'
               />
             </div>
-             {fieldErrors?.password && (
-            <div className='w-[90%] mx-auto'>
-              <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.password}</p>
-            </div>
-          ) }
+            {fieldErrors?.password && (
+              <div className='w-[90%] mx-auto'>
+                <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.password}</p>
+              </div>
+            )}
 
             <div className="self-start p-2 update-password-rules bg-gray-950/50 border border-white/5 rounded-xl">
               <h1 className="font-semibold mb-2 text-gray-400 text-sm">
                 Password must contain:
               </h1>
               <div className="rules-container flex flex-col gap-2 mt-2">
-                {passwordRules.map((rule) => (
+                {showPasswordRules && passwordRules.map((rule) => (
                   <div key={rule.id} className='flex items-center gap-2 text-sm'>
                     <div className={`rounded-full h-4 w-4 flex items-center justify-center transition-colors ${rule.valid ? "bg-emerald-500" : "bg-gray-300"} `}>
                       {rule.valid && <span className='className="text-[10px] text-white"'>✓</span>}
@@ -151,10 +162,10 @@ const RegisterPage = () => {
               />
             </div>
             {fieldErrors?.email && (
-            <div className='w-[90%] mx-auto'>
-              <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.email}</p>
-            </div>
-          ) }
+              <div className='w-[90%] mx-auto'>
+                <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.email}</p>
+              </div>
+            )}
             <div className='w-full bg-gray-800/50 border border-white/20 rounded-xl backdrop-blur-md p-3 flex items-center gap-3 focus-within:ring-2 focus-within:ring-blue-500 transition-all'>
               <LuImage className='text-blue-400 w-5 h-5 flex-shrink-0' />
 
@@ -171,7 +182,11 @@ const RegisterPage = () => {
                 />
               </label>
             </div>
-
+            {fieldErrors?.imageProfile && (
+              <div className='w-[90%] mx-auto'>
+                <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.imageProfile}</p>
+              </div>
+            )}
           </div>
 
           <div className='register-button w-[60%] mx-auto mt-5'>
@@ -200,25 +215,40 @@ const RegisterPage = () => {
 export const registerAction = async ({ request }) => {
   const formData = await request.formData();
   try {
-    if (!formData.get("username") || !formData.get("password") || !formData.get("email") || !formData.get("imageProfile")) {
-      return { error: "All fields are required" };
+    if (!formData.get("username") ||
+      !formData.get("password") ||
+      !formData.get("email") ||
+      !formData.get("imageProfile")) {
+      return { generalErrors: "All fields are required" };
     }
 
-     const passRules = checkPassRules(formData.get("password"));
-     const isInvalidPass = passRules.some((rule) => !rule.valid);
-     if (isInvalidPass) return { preValidationError: "Password must match all rules" }
+    const passRules = checkPassRules(formData.get("password"));
+    const isInvalidPass = passRules.some((rule) => !rule.valid);
+    if (isInvalidPass) return { preValidationError: "Password must match all rules" }
 
     const res = await api.post("/auth/register", formData);
-    console.log("res data", res.data);
     return { data: res.data };
   }
   catch (error) {
-    console.error("Error", error);
-    if (error?.response && error.response?.data?.message && error.response.status === 400) {
-      return { fieldErrors: error.response?.data?.message };
-    } else if (error.response.status > 500) {
-      return { serverErrors: "Problem with server, please try again later" }
+    if (import.meta.env.MODE !== "production") {
+      console.error("Error", error);
     }
+
+    if (error.response) {
+      if (error.response.status === 400 || error.response.status === 409 || error.response.status === 413) {
+        return { fieldErrors: error.response?.data?.message };
+      }
+
+      if (error.response.status >= 500) {
+        return { serverErrors: "Server is having trouble, try again in a minute" }
+      }
+    }
+
+    if (error.request) {
+      return { serverErrors: "We can't connect to the server. Please check your internet."} 
+    }
+
+
     return { generalErrors: "Registration failed" }
   }
 };

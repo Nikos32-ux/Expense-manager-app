@@ -21,6 +21,13 @@ import static java.time.LocalDateTime.now;
 @RestControllerAdvice
 public class ControllerValidation {
 
+     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> buildErrorList(String field, String message){
+        Map<String, String> listErrors = new HashMap<>();
+        listErrors.put(field, message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GlobalExceptionRes<>(400, listErrors, LocalDate.now()));
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex){
         Map<String, String> listErrors = new HashMap<>();
@@ -31,10 +38,15 @@ public class ControllerValidation {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex){
+        GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(409, Map.of("email", ex.getMessage()), LocalDate.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
+    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<GlobalExceptionRes<String>> handleImageSizeException(MaxUploadSizeExceededException ex){
-        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(413,"The uploaded file is too large! Maximum allowed size is 5MB", LocalDate.now());
+    public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleImageSizeException(MaxUploadSizeExceededException ex){
+        GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(413,Map.of("imageProfile", "The uploaded file is too large! Maximum allowed size is 5MB"), LocalDate.now());
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(exceptionRes);
     }
 
@@ -78,15 +90,13 @@ public class ControllerValidation {
     }
 
     @ExceptionHandler(CloudinaryException.class)
-    public ResponseEntity<GlobalExceptionRes<String>> handleCloudinaryUpload(CloudinaryException ex){
-        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(400, ex.getMessage(), LocalDate.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);
+    public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleCloudinaryUpload(CloudinaryException ex){
+        return buildErrorList("imageProfile", ex.getMessage()); 
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
-    public ResponseEntity<GlobalExceptionRes<String>> handleInvalidFileType(InvalidFileTypeException ex){
-        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(400, ex.getMessage(), LocalDate.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);
+    public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleInvalidFileType(InvalidFileTypeException ex){
+        return buildErrorList("imageProfile", ex.getMessage());
     }
 
     @ExceptionHandler(DataAccessException.class)
@@ -110,15 +120,9 @@ public class ControllerValidation {
     }
 
     @ExceptionHandler(ExpenseNotFoundException.class)
-    public ResponseEntity<GlobalExceptionRes<String>> handleExpenseNotFoundException(ExpenseNotFoundException ex){
-        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(404,"Expense not found", LocalDate.now());
+    public ResponseEntity<GlobalExceptionRes<String>> handleExpenseNotFoundException(ExpenseNotFoundException ex) {
+        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(404, "Expense not found", LocalDate.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionRes);
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<GlobalExceptionRes<String>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex){
-        GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(409, ex.getMessage(), LocalDate.now());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
     }
 
     @ExceptionHandler(CategoryNotFoundException.class)

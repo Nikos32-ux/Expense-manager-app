@@ -55,6 +55,16 @@ const DashBoard = () => {
 
 
   const renderExpenses = () => {
+    if (fetchedExpenses.length === 0) return (
+      <div className="flex bg-gray-200/10 flex-col items-center justify-center mt-20 opacity-80">
+            <div className="bg-gray-200 p-6 rounded-full mb-4">
+              <LuShoppingBag size={48} className="text-gray-400" />
+            </div>
+            <h3 className="text-gray-600 font-bold text-lg">{t("zero-transactions")}</h3>
+            <p className="text-gray-500 text-sm text-center px-10">
+              {t("dashboard-empty-subtitle")}
+            </p>
+          </div>)
     return fetchedExpenses.map((expense) => {
       let categoryRow = categories.find(category => category.id === expense.categoryId);
       return <Expense
@@ -64,6 +74,8 @@ const DashBoard = () => {
       />
     })
   }
+
+
 
   const estimateBalance = () => {
     let balance;

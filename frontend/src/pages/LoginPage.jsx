@@ -17,13 +17,13 @@ const LoginPage = () => {
   const toastRef = useRef(false);
 
   useEffect(() => {
-    if(!location.state?.success) return;
-    if(location.state.success && !toastRef.current){
-       toastRef.current = true;
-       toast.success(location.state.success);
+    if (!location.state?.success) return;
+    if (location.state.success && !toastRef.current) {
+      toastRef.current = true;
+      toast.success(location.state.success);
       window.history.replaceState({}, document.title);
     }
-  },[location.state?.success]);
+  }, [location.state?.success]);
 
 
   useEffect(() => {
@@ -146,13 +146,23 @@ export const loginAction = async ({ request }) => {
     queryClient.setQueryData(["verification"], response.data);
     return redirect("/dashboard");
   } catch (error) {
-    if (error.response) {
-      console.error("SERVER_ERROR:", error.response.data);
-    } else if (error.request) {
-      console.error("NETWORK_ERROR:", error.request);
+    if (error?.response) {
+      if (import.meta.env.MODE !== "production") {
+        console.error("SERVER_ERROR:", error.response.data);
+      }
+      return { error: error.response.data?.message || "Something went wrong" }
+    }
+    if (error?.request) {
+      if (import.meta.env.MODE !== "production") {
+        console.error("NETWORK_ERROR:", error.request);
+      }
       return { error: "Server is unreachable. Try again later." };
     }
-    console.error("UNKNOWN_ERROR:", error.message);
+
+    if (import.meta.env.MODE !== "production") {
+      console.error("UNKNOWN ERROR:", error);
+    }
+
     return { error: "Something went wrong." };
   }
 };

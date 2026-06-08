@@ -207,6 +207,9 @@ CREATE INDEX idx_idempotency_key
 ON idempotent_records(idempotency_key);
 
 
+--changeset admin:021
+CREATE INDEX idx_user_email
+ON users(email);
 
 
 

@@ -9,11 +9,11 @@ import { verifyUser } from '../queries/authQuery';
 import Expense from '../components/expenses/Expense.jsx';
 import useAuth from '../hooks/useAuth';
 import * as LuIcons from "react-icons/lu";
-import { LuUser, LuBell, LuChevronLeft, LuSettings2, LuPlus, LuDownload, LuPanelTop, LuShieldCheck, LuLayoutGrid, LuWallet, LuFileUp, LuLogOut, LuFileText } from 'react-icons/lu';
+import { LuUser, LuBell, LuChevronLeft, LuSettings2, LuShoppingBag, LuPlus, LuDownload, LuPanelTop, LuShieldCheck, LuLayoutGrid, LuWallet, LuFileUp, LuLogOut, LuFileText } from 'react-icons/lu';
 import toast from 'react-hot-toast';
 import LoadSpinner from '../components/ui/LoadSpinner.jsx';
 import { categories } from '../categories/categories.js';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ExpenseDetail from '../components/expenses/ExpenseDetail.jsx';
 import useDashboard from '../hooks/useDashboard.jsx';
 import ExpenseSkeleton from '../components/expenses/ExpenseSkeleton.jsx';
@@ -22,7 +22,7 @@ import { Client } from '@stomp/stompjs';
 
 
 const DashBoard = () => {
-  
+
   const { user, isLoading } = useOutletContext();
   const location = useLocation();
   const { notifications, setNotifications } = useContext(WebSocketContext);
@@ -30,7 +30,7 @@ const DashBoard = () => {
   const navigate = useNavigate();
   const mutation = useAuth();
   const [showDeletedSuccess, setShowDeletedSuccess] = useState(false);
-
+  const toastRef = useRef();
 
   const {
     fetchedExpenses,
@@ -41,11 +41,15 @@ const DashBoard = () => {
     monthIncomeDataIsLoading
   } = useDashboard();
 
+
   useEffect(() => {
     if (!location?.state?.success) return;
-    toast.success(location.state.success);
-    navigate("/dashboard", { replace: true, state: {} });
-  }, [location, navigate]);
+     if(location.state.success && !toastRef.current){
+           toastRef.current = true;
+           toast.success(location.state.success);
+           navigate("/dashboard", { replace: true, state: {} });
+        }
+  }, [location.state?.success]);
 
   const renderSkeletons = new Array(5).fill(null).map((_, i) => <ExpenseSkeleton key={i} />);
 

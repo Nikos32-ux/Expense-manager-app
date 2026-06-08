@@ -4,11 +4,19 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { verifyUser } from '../queries/authQuery';
 import RootErrorBoundary from '../components/ui/RootErrorBoundary';
 import LoadSpinner from '../components/ui/LoadSpinner';
-
+import { runVerification } from '../queries/authQuery';
 
 const PrivateRoutes = () => {
     const isRestoring = useIsRestoring();
-    const {data: user, isError, error, isLoading} = useQuery(verifyUser());
+    const {data: user, isError, error, isLoading} = useQuery({
+        queryKey: ["verification"],
+            queryFn: runVerification,
+            staleTime: 1000 * 60 * 5,
+            retry: false,
+            refetchOnWindowFocus: false,
+            meta: { persist: true },
+            enabled:!!isRestoring
+    });
     
     if(isRestoring) {
         return <LoadSpinner/>;

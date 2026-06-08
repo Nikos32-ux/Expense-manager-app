@@ -71,7 +71,8 @@ const resources = {
       "cash": "Cash",
       "add-description-expense": "Add a description for the expense",
       "saving": "Saving...",
-      "save-expense": "Save expense"
+      "save-expense": "Save expense",
+      "dashboard-empty-subtitle" : "No transactions recorded yet. Use the buttons above to add your first expense or income"
     }
   },
   el: {
@@ -98,7 +99,7 @@ const resources = {
       "sort": "Ταξινόμησε",
       "filter": "Φίλτρο",
       "apply": "Εφαρμογή",
-      "zero-transactions": "Καμία συναλλαγή",
+      "zero-transactions": "Δεν υπάρχουν πρόσφατες συναλλαγές",
       "choose-filter-add-expense": "Πρόσθεσε καινούρια συναλλαγή 'η δοκίμασε κάποιο φίλτρο",
       "day": "Ημέρα",
       "week": "Εβδομάδα",
@@ -142,7 +143,8 @@ const resources = {
       "cash": "Μετρητά",
       "add-description-expense": "Προσθέστε περιγραφή συναλλαγής",
       "saving": "Αποθηκεύεται...",
-      "save-expense" : "Αποθήκευση"
+      "save-expense" : "Αποθήκευση",
+      "dashboard-empty-subtitle": "Δεν έχετε καταγράψει ακόμα συναλλαγές. Χρησιμοποιήστε τα κουμπιά παραπάνω για να προσθέσετε το πρώτο σας έξοδο ή έσοδο."
     }
   }
 };

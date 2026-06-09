@@ -134,7 +134,7 @@ const RegisterPage = () => {
             )}
 
             <div className="self-start p-2 update-password-rules bg-gray-950/50 border border-white/5 rounded-xl">
-              <h1 className="font-semibold mb-2 text-gray-400 text-sm">
+              <h1 className={`font-semibold mb-2 text-gray-400 text-sm ${showPasswordRules ? "block" : "hidden"}`}>
                 Password must contain:
               </h1>
               <div className="rules-container flex flex-col gap-2 mt-2">

@@ -6,23 +6,35 @@ export const queryClient = new QueryClient({
 
   queryCache: new QueryCache({
     onError: (error) => {
-      console.error(`Full error:`, error)
-      console.error("MESSAGE:", error?.message);
-      console.error("STACK:", error?.stack);
+      if (import.meta.env.MODE !== 'production') {
+        console.error(`FULL_ERROR:`, error)
+        console.error("MESSAGE:", error?.message);
+        console.error("STACK:", error?.stack);
+      }
+
     }
   }),
 
   mutationCache: new MutationCache({
     onError: (error) => {
-      console.error(`Full error:`, error)
-      console.error("MESSAGE:", error?.message);
-      console.error("STACK:", error?.stack);
+       if (import.meta.env.MODE !== 'production') {
+        console.error(`FULL_ERROR:`, error)
+        console.error("MESSAGE:", error?.message);
+        console.error("STACK:", error?.stack);
+      }
     }
   }),
 
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
+      retry: (failureCount, error) => {
+        if(error?.response?.status && [400,401,403,404].includes(error.response.status)){
+          return false;
+        }
+        
+        return failureCount < 3;
+      }
     }
   }
 })

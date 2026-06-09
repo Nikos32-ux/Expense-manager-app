@@ -30,7 +30,7 @@ const DashBoard = () => {
   const navigate = useNavigate();
   const mutation = useAuth();
   const [showDeletedSuccess, setShowDeletedSuccess] = useState(false);
-  const toastRef = useRef(false);
+  const toastRef = useRef();
 
   const {
     fetchedExpenses,

@@ -44,13 +44,12 @@
       
       if (data?.success && startProcessRef.current === false) {
         startProcessRef.current = true;
-        setSuccess(data?.success);
         setReportStale(true);
 
-         queryClient.invalidateQueries(["month-expenses-total"]);
-         queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"] });
-         queryClient.invalidateQueries({ queryKey: ["expenses"] });
-         navigate("/dashboard", {state:{success: data?.success }});
+        queryClient.invalidateQueries({ queryKey: ["month-expenses-total"], exact: true });
+        queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"], exact: true });
+        queryClient.invalidateQueries({ queryKey: ["expenses"], exact: true });
+        navigate("/dashboard", {state:{success: data?.success }});
 
       } else if (data?.error) {
         setError(data?.error);

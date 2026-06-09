@@ -18,6 +18,7 @@ public record ExpenseReqDTO(
         Long categoryId,
 
         @NotBlank(message = "{expense.description.notBlank}")
+        @Size(min = 1, max = 255, message = "{expense.description.size}")
         String description,
 
         @NotNull(message = "{expense.date.notnull}")
@@ -27,5 +28,6 @@ public record ExpenseReqDTO(
         LocalTime time,
 
         @NotBlank(message = "{expense.payment.notBlank}")
+        @Pattern(regexp = "cash|card", message = "{expense.payment.pattern}")
         String payment
 ) {}

@@ -98,7 +98,7 @@ const ExpenseDetail = () => {
   
 
   return (
-    <div className='container w-full h-[100dvh] fixed inset-0 z-50 bg-white/20 backdrop-blur-sm fadeInParent'>
+    <div className='container w-full h-[100dvh] fixed inset-0 z-[1000] bg-white/20 backdrop-blur-sm fadeInParent'>
       <div ref={expenseDetailRef} className='fixed bottom-0 left-0 right-0 h-[80vh] flex flex-col openExpenseDetail'>
         <div className="header relative">
           <div className='flex items-center justify-center bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 h-[25vh] rounded-t-2xl '>

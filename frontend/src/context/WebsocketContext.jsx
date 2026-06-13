@@ -6,14 +6,16 @@ import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 import api from "../axiosClientApi/axios";
 import { ExpenseDetailContext } from "./ExpenseDetailContext";
+import { AuthContext } from "./AuthContext";
 
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
+    const {authReady} = useContext(AuthContext);
     const authUser = queryClient.getQueryData(["verification"]);
     const {reportStale, setReportStale} = useContext(ExpenseDetailContext);
     
-    const getNotifications = async () => {    
+    const getNotifications = async () => {
         const res = await api.get("notifications/get-notifications");
         if(res.data.length === 0) {
             setReportStale(true);
@@ -29,6 +31,7 @@ export const WebSocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (!authUser) return;
+       
         const client = new Client({
             brokerURL: import.meta.env.VITE_WS_URL,
             reconnectDelay: 5000,

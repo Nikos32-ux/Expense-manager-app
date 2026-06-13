@@ -4,9 +4,11 @@ import { Form, Link, redirect, useActionData, useLocation, useNavigate, useNavig
 import api from '../axiosClientApi/axios.js';
 import { queryClient } from '../context/queryClient.js';
 import toast from 'react-hot-toast';
+import { AuthContext } from '../context/AuthContext.jsx';
 
 
 const LoginPage = () => {
+  const {authReady, setAuthReady} = useContext(AuthContext);
   const actionLoginData = useActionData();
   const navigation = useNavigation();
   const [displayError, setDisplayError] = useState(null);
@@ -34,6 +36,7 @@ const LoginPage = () => {
       if (formRef.current) {
         formRef.current.reset();
       }
+      setAuthReady(true);
       navigate("/dashboard")
     }
     else if (actionLoginData.error) {
@@ -144,7 +147,8 @@ export const loginAction = async ({ request }) => {
 
     let response = await api.post("/auth/login", { email, password });
     queryClient.setQueryData(["verification"], response.data);
-    return redirect("/dashboard");
+    
+    return { success: true };
   } catch (error) {
     if (error?.response) {
       if (import.meta.env.MODE !== "production") {

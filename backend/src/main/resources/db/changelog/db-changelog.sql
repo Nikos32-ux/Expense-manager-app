@@ -211,6 +211,13 @@ ON idempotent_records(idempotency_key);
 CREATE INDEX idx_user_email
 ON users(email);
 
+--changeset admin:022
+ALTER TABLE reports
+ADD CONSTRAINT uk_reports_user_id
+UNIQUE(user_id)
+
+--changeset admin:023
+DROP INDEX idx_reports_user_id
 
 
 

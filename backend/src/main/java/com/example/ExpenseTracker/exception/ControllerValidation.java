@@ -1,5 +1,6 @@
 package com.example.ExpenseTracker.exception;
 import com.example.ExpenseTracker.dto.GlobalExceptionRes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import static java.time.LocalDateTime.now;
 
 
 @RestControllerAdvice
+@Slf4j
 public class ControllerValidation {
 
      public ResponseEntity<GlobalExceptionRes<Map<String, String>>> buildErrorList(String field, String message){
@@ -46,12 +48,14 @@ public class ControllerValidation {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleImageSizeException(MaxUploadSizeExceededException ex){
+        log.warn("File upload too large");
         GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(413,Map.of("imageProfile", "The uploaded file is too large! Maximum allowed size is 5MB"), LocalDate.now());
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(exceptionRes);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleBadCredentials(BadCredentialsException ex){
+        log.warn("Failed login attempt");
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(401,"Invalid credentials", LocalDate.now());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionRes);
     }
@@ -91,6 +95,7 @@ public class ControllerValidation {
 
     @ExceptionHandler(CloudinaryException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleCloudinaryUpload(CloudinaryException ex){
+        log.error("Cloudinary upload failed", ex);
         return buildErrorList("imageProfile", ex.getMessage()); 
     }
 
@@ -101,20 +106,21 @@ public class ControllerValidation {
 
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleDatabaseExceptions(DataAccessException ex){
-        ex.printStackTrace();
+        log.error("Database error occurred", ex);
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(500,"Something went wrong, internal server error", LocalDate.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionRes);
     }
 
     @ExceptionHandler(FileReadException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleFileReadException(FileReadException ex){
+        log.error("File read error", ex);
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(500, ex.getMessage(), LocalDate.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionRes);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<GlobalExceptionRes<String>> dbConstraintViolationException(DataIntegrityViolationException ex){
-        System.err.println("DB ERROR: " + ex.getMostSpecificCause().getMessage());
+        log.warn("DB constraint violation: {}", ex.getMessage());
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(409,"Constraint violation occurred", LocalDate.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
     }

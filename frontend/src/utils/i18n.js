@@ -72,7 +72,8 @@ const resources = {
       "add-description-expense": "Add a description for the expense",
       "saving": "Saving...",
       "save-expense": "Save expense",
-      "dashboard-empty-subtitle" : "No transactions recorded yet. Use the buttons above to add your first expense or income"
+      "dashboard-empty-subtitle" : "No transactions recorded yet. Use the buttons above to add your first expense or income",
+      "no-more-items":"No more expenses"
     }
   },
   el: {
@@ -144,7 +145,8 @@ const resources = {
       "add-description-expense": "Προσθέστε περιγραφή συναλλαγής",
       "saving": "Αποθηκεύεται...",
       "save-expense" : "Αποθήκευση",
-      "dashboard-empty-subtitle": "Δεν έχετε καταγράψει ακόμα συναλλαγές. Χρησιμοποιήστε τα κουμπιά παραπάνω για να προσθέσετε το πρώτο σας έξοδο ή έσοδο."
+      "dashboard-empty-subtitle": "Δεν έχετε καταγράψει ακόμα συναλλαγές. Χρησιμοποιήστε τα κουμπιά παραπάνω για να προσθέσετε το πρώτο σας έξοδο ή έσοδο.",
+      "no-more-items" : "Δεν υπάρχουν άλλα έξοδα"
     }
   }
 };

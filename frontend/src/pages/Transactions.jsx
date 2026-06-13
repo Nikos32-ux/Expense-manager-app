@@ -14,6 +14,7 @@ import Expense from '../components/expenses/Expense.jsx';
 import { categories } from '../categories/categories.js';
 import { ExpenseDetailContext } from '../context/ExpenseDetailContext.jsx';
 import { useTranslation } from 'react-i18next';
+import LoadSpinner from '../components/ui/LoadSpinner.jsx';
 
 
 const Transactions = () => {
@@ -67,12 +68,10 @@ const Transactions = () => {
         }
       }
     );
-    console.log("expenses", res.data);
-
     return res.data;
   }
 
-  const { data: expenses = { pages: [], pageParams: [] }, isFetchingNextPage, isLoading, isFetching, hasNextPage, fetchNextPage } = useInfiniteQuery({
+  const { data: expenses = { pages: [], pageParams: [] }, isFetchingNextPage, isLoading, isFetching, hasNextPage, fetchNextPage, status, isError, error } = useInfiniteQuery({
     queryKey: ["expenses", appliedFilters],
     queryFn: ({ pageParam }) => fetchExpenses(pageParam),
     initialPageParam: 0,
@@ -87,10 +86,13 @@ const Transactions = () => {
 
   useEffect(() => {
     if (!loadMoreRef.current) return;
+
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !isFetchingNextPage && hasNextPage) {
         fetchNextPage();
       }
+    }, {
+      rootMargin: '0px 0px -100px 0px'
     });
 
     if (loadMoreRef.current !== null) {
@@ -171,23 +173,6 @@ const Transactions = () => {
       </div>
     )
   );
-
-  const renderExpensesList = () => {
-    if (isLoading) return <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>;
-    return expenses.pages.flatMap(page => page.content).map((expense, idx) => {
-      console.log("expense", expense);
-
-
-      let categoryRow = categories.find(category => category.id === expense.categoryId);
-      return <Expense
-        key={expense.id}
-        categoryRow={categoryRow}
-        expense={expense}
-      />
-    })
-  }
 
 
   return (
@@ -314,15 +299,34 @@ const Transactions = () => {
           </div>
         </section>
         <section className="expenses-container flex flex-col flex-1 w-full gap-4 overflow-y-auto bg-slate-50 -mt-6 pt-10 rounded-t-[40px] z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-          <div className="max-w-4xl mx-auto w-full px-4">
-            {renderExpensesList()}
+          {
+            isLoading
+              ? (<LoadSpinner />)
+              : isError
+                ? (<div><p>Something happened.</p></div>)
+                : (
+                  <div className="max-w-4xl  mx-auto w-full px-4 pb-20">
+                    {expenses.pages.flatMap(page => page.content).map((expense, idx) => {
+                      let categoryRow = categories.find(category => category.id === expense.categoryId);
+                      return <Expense
+                        key={expense.id}
+                        categoryRow={categoryRow}
+                        expense={expense}
+                      />
+                    })}
 
-            <div className='h-[10vh] mb-10 mx-auto animate-pulse rounded-lg bg-gray-200/40 flex items-center justify-center mt-10'>
-              <span ref={loadMoreRef} className={`text-gray-400 text-[14px] uppercase ${isLoading ? "hidden" : "block "}`}>
-                {hasNextPage ? "Loading more" : "No more items"}
-              </span>
-            </div>
-          </div>
+                    <div className='h-20 flex items-center justify-center mt-5'>
+                      <span ref={loadMoreRef} className={`text-gray-400 text-[14px] uppercase`}>
+                        {isFetchingNextPage ? (
+                          <LoadSpinner size="small" />
+                        ) : !hasNextPage ? (
+                          t("no-more-items")
+                        ) : null}
+                      </span>
+                    </div>
+                  </div>
+                )
+          }
         </section>
       </main>
       {openPicker && (

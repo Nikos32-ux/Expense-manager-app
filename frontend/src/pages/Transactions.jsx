@@ -235,9 +235,8 @@ const Transactions = () => {
         <section className='transactions-top-part flex flex-col items-center pt-2 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.2)),url("/login-page.jpg")] bg-cover bg-center shrink-0 min-h-[250px] lg:min-h-[300px]'>
           <h1 className='text-white font-bold text-xl tracking-widest'>{t("transactions")}</h1>
 
-          <div className='transactions-header-content flex flex-col relative flex-1 items-center w-full max-w-4xl mx-auto'>
-
-            <div className='search-input flex items-center w-full px-6 mb-2'>
+          <div className='transactions-header-content flex flex-col items-center w-full max-w-2xl mx-auto pb-4'>
+            <div className='search-input w-full px-6 mb-2'>
               <input
                 onChange={(e) => setTransactionFilters(prev => ({
                   ...prev,
@@ -249,8 +248,7 @@ const Transactions = () => {
                 placeholder='Search transactions...'
               />
             </div>
-
-            <div className="mt-4 w-[85%] lg:w-full lg:px-6 flex gap-3">
+            <div className=" w-[85%] lg:w-full lg:px-6 flex gap-3">
               <button
                 onClick={() => {
                   setDisplaySort(!displaySort);
@@ -268,9 +266,9 @@ const Transactions = () => {
                 <LuChevronDown size={18} /> {t("filter")}
               </button>
             </div>
-            <div className="w-full relative px-6">
-              {displaySort && <div className="absolute top-2 left-6 right-6 z-50">{sortFields}</div>}
-              {displayFilters && <div className="absolute top-2 left-6 right-6 z-50">{filters}</div>}
+            <div className="w-full px-6 flex flex-col gap-2 my-2">
+              {displaySort && <div>{sortFields}</div>}
+              {displayFilters && <div>{filters}</div>}
             </div>
             {openPicker && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/10  p-6">
@@ -280,7 +278,7 @@ const Transactions = () => {
                 />
               </div>
             )}
-            <div className='absolute bottom-2 left-1/2 -translate-x-1/2 z-20'>
+            <div className='flex justify-center py-4'>
               <button
                 onClick={() => setAppliedFilters(prev => ({
                   ...prev,

@@ -29,6 +29,7 @@ import RootErrorBoundary from './components/ui/RootErrorBoundary.jsx';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import PrivateRoutes from './layouts/PrivateRoutes.jsx';
 import PublicRoutes from './layouts/PublicRoutes.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 
 
 const router = createBrowserRouter([
@@ -51,7 +52,7 @@ const router = createBrowserRouter([
         element: <PrivateRoutes />,
         children: [
           {
-            path:"dashboard",
+            path: "dashboard",
             element: <DashBoard />,
             children: [
               { path: "add-expense", action: addExpenseAction, element: <AddExpense /> },
@@ -60,7 +61,7 @@ const router = createBrowserRouter([
             ]
           },
           {
-            path:"profile",
+            path: "profile",
             element: <Profile />,
             children: [
               { path: "account-info", element: <AccountInfo /> },
@@ -68,7 +69,7 @@ const router = createBrowserRouter([
             ]
           },
           {
-            path: "categories", 
+            path: "categories",
             element: <Categories />
           },
           {
@@ -90,10 +91,12 @@ window.queryClient = queryClient;
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <PersistQueryClientProvider client={queryClient} persistOptions={customPersistOptions}>
-      <ExpenseDetailProvider>
-        <Toaster />
-        <RouterProvider router={router} />
-      </ExpenseDetailProvider>
+      <AuthProvider>
+        <ExpenseDetailProvider>
+          <Toaster />
+          <RouterProvider router={router} />
+        </ExpenseDetailProvider>
+      </AuthProvider>
     </PersistQueryClientProvider>
   </StrictMode>
 )

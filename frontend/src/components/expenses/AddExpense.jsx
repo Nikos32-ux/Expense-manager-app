@@ -8,7 +8,7 @@ import { LuBanknote } from 'react-icons/lu'
 import { queryClient } from '../../context/queryClient';
 import { ExpenseDetailContext } from '../../context/ExpenseDetailContext';
 import { v4 as uuidv4 } from 'uuid';
-
+import { addExpenseSchema } from '../../schemas/add-expense-schema.js';
 
 const AddExpense = () => {
   const data = useActionData();
@@ -17,12 +17,12 @@ const AddExpense = () => {
   const { reportStale, setReportStale } = useContext(ExpenseDetailContext);
   const [idempotencyKey] = useState(() => uuidv4());
   const [desc, setDesc] = useState("");
-  const [error, setError] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [serverErrors, setServerErrors] = useState(null);
   const navigation = useNavigation();
   const navigate = useNavigate();
   const startProcessRef = useRef(false);
+  const errorRef = useRef(null);
 
 
   useEffect(() => {
@@ -33,6 +33,16 @@ const AddExpense = () => {
       textareaEl.style.height = textareaEl.scrollHeight + "px";
     }
   }, [desc]);
+
+  useEffect(() => {
+    if (!errorRef.current) return;
+
+    if (((fieldErrors?.date || fieldErrors?.time) || serverErrors) && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [fieldErrors?.date, fieldErrors?.time, serverErrors])
+
+
 
   useEffect(() => {
     if (navigation.state === "submitting") {
@@ -53,15 +63,15 @@ const AddExpense = () => {
       navigate("/dashboard", { state: { success: data?.success } });
 
     }
-    
+
     if (data?.fieldErrors) {
-      setError(data.fieldErrors);
-      errorTimer = setTimeout(() => { setError(false); }, 3000);
+      setFieldErrors(data.fieldErrors);
+      errorTimer = setTimeout(() => { setFieldErrors(null); }, 10000);
     }
 
     if (data?.serverErrors) {
-      setError(data.serverErrors);
-      errorTimer = setTimeout(() => { setError(false); }, 3000);
+      setServerErrors(data.serverErrors);
+      errorTimer = setTimeout(() => { setServerErrors(null); }, 10000);
     }
 
 
@@ -95,14 +105,20 @@ const AddExpense = () => {
           </div>
         </div>
         <div className="add-expense-form w-full flex justify-center bg-trasparent items-start overflow-y-auto">
-          <Form method='post' className={`w-full max-w-lg space-y-2 ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100"} `}>
-            { fieldErrors || serverErrors &&
-           ( <div className='w-[90%] mx-auto mb-2'>
-              <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors || serverErrors}</p>
-            </div>)
+          <Form method='post' noValidate className={`w-full max-w-lg space-y-2 ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : "opacity-100"} `}>
+            <div ref={errorRef} className="h-0" />
+            {(serverErrors) &&
+              (<div  className='w-[90%] mx-auto mb-2'>
+                <p className='text-red-400 text-sm font-medium text-center'>{serverErrors}</p>
+              </div>)
             }
-            <div className='flex flex-col gap-2 p-2'>
+            <div className='flex flex-col px-2 w-full mb-4 '>
               <label htmlFor="date" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("transaction-date")}</label>
+              {(fieldErrors?.date) &&
+                (<div  className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors.date}</p>
+                </div>)
+              }
               <input
                 disabled={navigation.state === "submitting"}
                 name='monthYearDay'
@@ -110,7 +126,15 @@ const AddExpense = () => {
                 id="date"
                 className='w-full border border-white/10 bg-slate-900/40 text-slate-100 p-3 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none'
               />
-              <input
+            </div>
+            <div className='flex flex-col px-2 w-full mb-4 '>
+              <label htmlFor="time" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("transaction-time")}</label>
+               {(fieldErrors?.time) &&
+                (<div  className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors.time}</p>
+                </div>)
+              }
+               <input
                 disabled={navigation.state === "submitting"}
                 name='time'
                 type="time"
@@ -118,7 +142,13 @@ const AddExpense = () => {
                 className=' w-full border border-white/10 bg-slate-900/40 text-slate-100 p-3 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none'
               />
             </div>
-            <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
+            
+            <div className='flex flex-col px-2 w-full mb-4 '>
+              {(fieldErrors?.categoryId) &&
+                (<div className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors?.categoryId}</p>
+                </div>)
+              }
               <label htmlFor="categoryId" className='text-md font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("category")}</label>
               <select
                 disabled={navigation.state === "submitting"}
@@ -127,6 +157,7 @@ const AddExpense = () => {
                 id="categoryId"
                 className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none capitalize'
               >
+                <option value="">{t("select-category")}</option>
                 {categories && categories.map((category) => {
                   return <option
                     key={category.id}
@@ -142,8 +173,14 @@ const AddExpense = () => {
             <div>
               <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
             </div>
-            <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
+            <div className='flex flex-col px-2 w-full mb-4 '>
+
               <label htmlFor="desc" className='text-md  uppercase tracking-wider text-blue-400 ml-1'>{t("description")}</label>
+              {(fieldErrors?.description) &&
+                (<div className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors.description}</p>
+                </div>)
+              }
               <textarea
                 disabled={navigation.state === "submitting"}
                 name='description'
@@ -156,8 +193,13 @@ const AddExpense = () => {
                 rows={1}
                 className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-4 rounded-xl focus:border-blue-500 outline-none resize-none max-h-[100px]' />
             </div>
-            <div className='flex flex-col justify-start p-3 rounded-sm w-full'>
+            <div className='flex flex-col px-2 w-full mb-4 '>
               <label htmlFor="amount" className='font-semibold uppercase tracking-wider text-blue-400 ml-1'>{t("amount")}</label>
+              {(fieldErrors?.amount) &&
+                (<div className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors.amount}</p>
+                </div>)
+              }
               <input
                 disabled={navigation.state === "submitting"}
                 name='amount'
@@ -168,7 +210,7 @@ const AddExpense = () => {
                 className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-3 pl-8 rounded-xl focus:border-blue-500 outline-none text-xl font-medium'
               />
             </div>
-            <div className='flex flex-col justify-start p-2 rounded-sm w-full'>
+            <div className='flex flex-col px-2 w-full mb-4 '>
               <div className="flex items-center gap-2 mb-1 ml-1">
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <LuBanknote className="text-emerald-400" size={18} />
@@ -177,12 +219,18 @@ const AddExpense = () => {
                   {t("payment-method")}
                 </label>
               </div>
+              {(fieldErrors?.payment) &&
+                (<div className='my-1 self-start ml-1'>
+                  <p className='text-red-400 text-sm font-medium text-center'>{fieldErrors.payment}</p>
+                </div>)
+              }
               <select
                 disabled={navigation.state === "submitting"}
                 name='payment'
                 id="payment"
                 className='w-full bg-slate-900/40 border border-white/10 text-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none capitalize'
               >
+                <option value="">{t("select-payment-method")}</option>
                 <option value="cash" className="bg-slate-800">{t("cash")}</option>
                 <option value="card" className="bg-slate-800">{t("card")}</option>
               </select>
@@ -214,26 +262,27 @@ const AddExpense = () => {
 }
 
 export const addExpenseAction = async ({ request }) => {
-  const data = await request.formData();
-  const date = data.get("monthYearDay");
-  const time = data.get("time");
-  const categoryId = parseInt(data.get("categoryId"));
-  const description = data.get("description");
-  const amount = parseFloat(data.get("amount"));
-  const payment = data.get("payment");
-  const requestKey = data.get("idempotencyKey");
+  const formData = await request.formData();
+  const requestData = Object.fromEntries(formData);
+  const requestKey = requestData.idempotencyKey;
 
+  const expensePayload = {
+    amount: requestData.amount,
+    categoryId: requestData.categoryId,
+    description: requestData.description,
+    date: requestData.monthYearDay,
+    time: requestData.time,
+    payment: requestData.payment
+  };
 
-  if (!amount || !date || !time || !categoryId || !description || !payment) return { fieldErrors: "All fields are required" };
-  if (amount < 0) return { amount: "Insert a positive amount" };
-  if (description.length > 255) return { description: "Description up to 255 characters" };
+  const validation = addExpenseSchema.safeParse(expensePayload);
+  if (!validation.success) {
+    return { fieldErrors: validation.error.flatten().fieldErrors }
+  }
 
-  const finalExpense = { amount, categoryId, description, date, time, payment };
   try {
-    console.log("idempotency key", requestKey);
-
     const res = await api.post(
-      "/expenses/add_expense", finalExpense, {
+      "/expenses/add_expense", validation.data, {
       headers: {
         'Idempotency-Key': requestKey
       }

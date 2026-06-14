@@ -63,6 +63,7 @@ const resources = {
       "expense": "Expense",
       "add-expense":"Add expense",
       "transaction-date": "Transaction date",
+      "transaction-time": "Transaction time",
       "category": "Category",
       "description": "Description",
       "amount": "Amount",
@@ -73,7 +74,9 @@ const resources = {
       "saving": "Saving...",
       "save-expense": "Save expense",
       "dashboard-empty-subtitle" : "No transactions recorded yet. Use the buttons above to add your first expense or income",
-      "no-more-items":"No more expenses"
+      "no-more-items":"No more expenses",
+      "select-payment-method": "Select payment method",
+      "select-category": "Select category"
     }
   },
   el: {
@@ -136,6 +139,7 @@ const resources = {
       "expense": "Συναλλαγη",
       "add-expense":"Προσθήκη συναλλαγής",
       "transaction-date": "Ημερομηνία συναλλαγής",
+      "transaction-time": "Ώρα συναλλαγής",
       "category": "Κατηγορία",
       "description": "Περιγραφή",
       "amount": "Ποσό",
@@ -146,7 +150,9 @@ const resources = {
       "saving": "Αποθηκεύεται...",
       "save-expense" : "Αποθήκευση",
       "dashboard-empty-subtitle": "Δεν έχετε καταγράψει ακόμα συναλλαγές. Χρησιμοποιήστε τα κουμπιά παραπάνω για να προσθέσετε το πρώτο σας έξοδο ή έσοδο.",
-      "no-more-items" : "Δεν υπάρχουν άλλα έξοδα"
+      "no-more-items" : "Δεν υπάρχουν άλλα έξοδα",
+      "select-payment-method": "Επιλέξτε μέθοδο πληρωμής",
+      "select-category": "Επιλέξτε κατηγορία"
     }
   }
 };

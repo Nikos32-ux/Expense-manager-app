@@ -1,6 +1,7 @@
 package com.example.ExpenseTracker.service.Auth;
 import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.exception.*;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.example.ExpenseTracker.config.jwtConfig.JwtUtils;
 import com.example.ExpenseTracker.model.RoleCategory;
 import com.example.ExpenseTracker.model.Roles;
@@ -42,6 +43,9 @@ public class AuthServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private LoadingCache<String, User> cache;
 
     @Mock
     RolesRepository rolesRepository;
@@ -123,8 +127,7 @@ public class AuthServiceImplTest {
 
             RegisterResDTO result = authService.saveUser(requestDTO);
 
-            assertEquals(requestDTO.username(), result.username());
-            assertEquals(requestDTO.email(), result.email());
+            assertEquals( "Registration was successful", result.message());
 
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(userRepository).save(userCaptor.capture());
@@ -498,12 +501,12 @@ public class AuthServiceImplTest {
            UpdatePasswordResDTO result = authService.changePassword(user.getId(), updatePasswordReqDTO);
 
             assertEquals("Updated password successfully", result.message());
-            assertEquals("username", result.username());
-            assertEquals("test@gmail.com", result.email());
+            assertEquals("success", result.status());
             assertEquals("hashedPass", user.getPassword());
 
             verify(userRepository).findByEmailBasic(user.getId());
             verify(passwordEncoder).encode(updatePasswordReqDTO.password());
+            verify(cache).invalidate(user.getEmail());
         }
 
         @Test

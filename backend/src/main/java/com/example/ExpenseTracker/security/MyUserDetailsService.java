@@ -22,10 +22,6 @@ public class MyUserDetailsService implements UserDetailsService {
         log.debug("Loading user {}", email);
         User user = cache.get(email);
 
-        if(user == null) {
-            log.warn("User not found {}", email);
-            throw new UsernameNotFoundException("User not found");
-        }
-       return new UserPrincipal(user);
+        return new UserPrincipal(user);
     }
 }

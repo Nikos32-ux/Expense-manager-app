@@ -19,6 +19,6 @@ public class AuthLoading {
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .maximumSize(1000)
                 .build(email -> userRepository.findByEmail(email)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email)));
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found")));
     }
 }

@@ -19,3 +19,14 @@ frontend/.env*
 # general
 .vscode/
 .DS_Store
+
+# Logs and Debug
+*.log
+backend/logs/
+
+# Database
+*.sql
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*

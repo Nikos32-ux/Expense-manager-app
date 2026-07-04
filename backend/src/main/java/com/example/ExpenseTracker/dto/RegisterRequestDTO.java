@@ -16,7 +16,7 @@ public record RegisterRequestDTO(
         String email,
 
         @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z@$!%*?&]{8,25}$",
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,25}$",
                 message = "{register.password.pattern}"
         )
         @NotBlank(message="{register.password.notBlank}")

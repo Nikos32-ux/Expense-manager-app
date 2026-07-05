@@ -80,7 +80,7 @@ public class ExpenseServiceImp implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public Expense getExpenseById(Long expenseId, Long userId) {
+    public Expense getExpenseEntity(Long expenseId, Long userId) {
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ExpenseNotFoundException(expenseId));
         Long expenseOwnerId = expense.getUser().getId();
@@ -88,12 +88,17 @@ public class ExpenseServiceImp implements ExpenseService {
         return expense;
     }
 
+    @Transactional(readOnly = true)
+    public ExpenseResDTO getExpenseById(Long expenseId, Long userId) {
+        return ExpenseMapper.mapToDTO(getExpenseEntity(expenseId, userId));
+    }
+
     @Override
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "monthly-expense-total", key = "#userId"),
             @CacheEvict(value = "reportData", key = "#userId"),
-            @CacheEvict(value = "category-total-amount", key = "#userId")
+            @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String idempotencyKey) {
          log.info("ADD_EXPENSE_REQUEST_RECEIVED userId={}, key={}", userId, idempotencyKey);
@@ -141,7 +146,7 @@ public class ExpenseServiceImp implements ExpenseService {
             @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public ExpenseResDTO updateExpense(Long expenseId, ExpenseReqDTO expenseReqDTO, Long userId) {
-        Expense expense = getExpenseById(expenseId, userId);
+        Expense expense = getExpenseEntity(expenseId, userId);
 
         LocalDateTime updatedTime = LocalDateTime.of(expenseReqDTO.date(), expenseReqDTO.time());
         ExpenseCategory category = expenseCatRepository.findById(expenseReqDTO.categoryId())
@@ -171,7 +176,7 @@ public class ExpenseServiceImp implements ExpenseService {
             @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public void deleteExpense(Long id, Long userId) {
-        Expense expense = getExpenseById(id, userId);
+        Expense expense = getExpenseEntity(id, userId);
 
         expenseRepository.deleteById(expense.getId());
         reportRepository.markReportStale(userId);

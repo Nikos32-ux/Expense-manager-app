@@ -14,7 +14,8 @@ public interface ExpenseService {
     AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String key);
     ExpenseResDTO updateExpense(Long id, ExpenseReqDTO expenseReqDTO, Long userId);
     void deleteExpense(Long id, Long userId);
-    Expense getExpenseById(Long expenseId, Long UserId);
+    Expense getExpenseEntity(Long expenseId, Long userId);
+    ExpenseResDTO getExpenseById(Long expenseId, Long UserId);
     List<ExpenseCategory> getExpenseCategories();
     Page<ExpenseResDTO> getDashExpenses( Long userId, Pageable pageable);
     MonthExpensesTotalInterface totalExpenses(Long userId);

@@ -67,7 +67,7 @@ public class ExpenseController {
     @GetMapping("get-expense/{id}")
     public ResponseEntity<ExpenseResDTO> getExpense(@PathVariable Long id){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
-        ExpenseResDTO expense = ExpenseMapper.mapToDTO(expenseService.getExpenseById(id, userId));
+        ExpenseResDTO expense = expenseService.getExpenseById(id, userId);
         return ResponseEntity.status(HttpStatus.OK).body(expense);
     }
 

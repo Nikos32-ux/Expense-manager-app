@@ -25,7 +25,6 @@ const RegisterPage = () => {
     if (actionLoginData?.data) navigate("/login", { state: { success: actionLoginData.data.message } });
 
     else if (actionLoginData?.generalErrors) {
-      console.log("general errors", actionLoginData.generalErrors);
       setgeneraErrors(actionLoginData?.generalErrors);
 
       errorTimer = setTimeout(() => {
@@ -33,14 +32,12 @@ const RegisterPage = () => {
       }, 3000);
 
     } else if (actionLoginData?.fieldErrors) {
-      console.log("field errors", actionLoginData.fieldErrors);
       setFieldErrors(actionLoginData?.fieldErrors);
 
       errorTimer = setTimeout(() => {
         setFieldErrors(false);
       }, 3000);
     } else if (actionLoginData?.serverErrors) {
-      console.log("server errors", actionLoginData.serverErrors);
       setServerErrors(actionLoginData?.serverErrors);
 
       errorTimer = setTimeout(() => {
@@ -227,6 +224,7 @@ export const registerAction = async ({ request }) => {
     if (isInvalidPass) return { preValidationError: "Password must match all rules" }
 
     const res = await api.post("/auth/register", formData);
+    
     return { data: res.data };
   }
   catch (error) {

@@ -50,10 +50,11 @@ public class ReportServiceImpl implements ReportService {
         Long userId = taskMessage.userId();
         String email = taskMessage.email();
 
-            Optional<Report> report = reportRepository.findByUserId(userId);
+            Optional<ReportStatusProjection> reportStatus = reportRepository
+                    .findStatusByUserId(userId);
 
-            if(report.isPresent()){
-                if(report.get().getStatus().equals("DONE")){
+            if(reportStatus.isPresent()){
+                if(reportStatus.get().getStatus().equals("DONE")){
                     log.info("Report already finished for user {}. Skipping duplicate.", userId);
                     return;
                 }
@@ -123,6 +124,7 @@ public class ReportServiceImpl implements ReportService {
                 reportMessageProducer.sendReportTask(userId, email);
             }
         }
+
         if(existingReportData != null && existingReportData.status().equals("STALE")){
             log.info("report PROCESSING userId {}", userId);
             int updateSucceeded = reportRepository.setReportStatus(userId);

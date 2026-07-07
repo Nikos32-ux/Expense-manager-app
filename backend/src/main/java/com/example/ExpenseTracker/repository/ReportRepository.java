@@ -1,5 +1,6 @@
 package com.example.ExpenseTracker.repository;
 import com.example.ExpenseTracker.dto.CheckReportExistsDTO;
+import com.example.ExpenseTracker.dto.ReportStatusProjection;
 import com.example.ExpenseTracker.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,6 +16,9 @@ import java.util.Optional;
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
     Optional<Report> findByUserId(Long userId);
+
+    @Query("SELECT r.status as status FROM Report r WHERE r.user.id = :userId")
+     Optional<ReportStatusProjection> findStatusByUserId(@Param("userId") Long userId);
 
     @Query(value = """
                 SELECT

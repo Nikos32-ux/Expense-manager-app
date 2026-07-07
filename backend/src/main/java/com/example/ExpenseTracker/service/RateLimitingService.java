@@ -34,6 +34,11 @@ public class RateLimitingService {
         if(user != null && user.isAuthenticated() && !(user instanceof AnonymousAuthenticationToken)){
             return user.getName();
         }
+
+        if(req.getHeader("X-Real-IP") != null && !req.getHeader("X-Real-IP").isEmpty()){
+            return req.getHeader("X-Real-IP");
+        }
+        
         return req.getRemoteAddr();
     }
 
@@ -44,7 +49,7 @@ public class RateLimitingService {
 
 
     public Rule findRateLimitPolicy(String path) {
-        List<Rule> rules = properties.getRules();
+       List<Rule> rules = properties.getRules();
 
        return rules.stream()
                 .filter(rule -> rule.getPath().equals(path))

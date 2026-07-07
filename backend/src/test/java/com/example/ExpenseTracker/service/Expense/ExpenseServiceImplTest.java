@@ -6,14 +6,8 @@ import com.example.ExpenseTracker.dto.MonthExpensesTotalInterface;
 import com.example.ExpenseTracker.exception.CategoryNotFoundException;
 import com.example.ExpenseTracker.exception.ExpenseNotFoundException;
 import com.example.ExpenseTracker.exception.ResourceNotFoundException;
-import com.example.ExpenseTracker.model.Expense;
-import com.example.ExpenseTracker.model.ExpenseCategory;
-import com.example.ExpenseTracker.model.User;
-import com.example.ExpenseTracker.model.UserActionsCategory;
-import com.example.ExpenseTracker.repository.ExpenseCatRepository;
-import com.example.ExpenseTracker.repository.ExpenseRepository;
-import com.example.ExpenseTracker.repository.ReportRepository;
-import com.example.ExpenseTracker.repository.UserRepository;
+import com.example.ExpenseTracker.model.*;
+import com.example.ExpenseTracker.repository.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +37,9 @@ class ExpenseServiceImplTest {
     private ExpenseRepository expenseRepository;
 
     @Mock
+    private IdempotencyRepository idempotencyRepository;
+    
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -58,9 +55,7 @@ class ExpenseServiceImplTest {
     private ExpenseServiceImp expenseServiceImp;
 
     private ExpenseReqDTO expenseReqDTO;
-    private final Long userId = 1L;
-    private final Long categoryId = 10L;
-    private final Long expenseId = 2L;
+
 
     @BeforeEach
     void setUp(){
@@ -68,19 +63,33 @@ class ExpenseServiceImplTest {
                 BigDecimal.valueOf(100),
                 10L,
                 "Coffee",
-                LocalDate.now(),
-                LocalTime.now(),
+                LocalDate.of(2026,1,15),
+                LocalTime.of(10,30),
                 "CASH"
         );
     }
-    @Test
-    void checkOwnership_ThrowsErrorOnMismatch() {
+
+    @Nested
+    class CheckOwnershipTests {
         Long userId = 1L;
         Long expenseOwnerId = 2L;
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            expenseServiceImp.checkOwnership(userId, expenseOwnerId);
-        });
+        @Test
+        void checkOwnership_ThrowsErrorOnMismatch() {
+            assertThrows(ResourceNotFoundException.class, () -> {
+                expenseServiceImp.checkOwnership(userId, expenseOwnerId);
+            });
+        }
+
+        @Test
+        void checkOwnership_DoesNotThrowWhenIdsMatch(){
+           Long loggedInUserId = 1L;
+           Long expenseOwnerId = 1L;
+
+            assertDoesNotThrow(() -> {
+                expenseServiceImp.checkOwnership(userId, expenseOwnerId);
+            });
+        }
     }
 
     @Nested
@@ -121,9 +130,9 @@ class ExpenseServiceImplTest {
 
 
     @Nested
-    class GetExpenseByIdx{
+    class GetExpenseEntityTests{
         @Test
-        void getExpenseById_whenUserIsOwner_returnsExpense(){
+        void shouldReturnsExpense_whenUserIsOwner(){
             User user = new User();
             user.setId(1L);
             Expense expense = new Expense();
@@ -131,15 +140,18 @@ class ExpenseServiceImplTest {
             expense.setUser(user);
 
             when(expenseRepository.findById(expense.getId())).thenReturn(Optional.of(expense));
-            Expense result = expenseServiceImp.getExpenseById(expense.getId(), user.getId());
+
+            Expense result = expenseServiceImp.getExpenseEntity(expense.getId(), user.getId());
+
             assertEquals(expense, result);
         }
         @Test
-        void getExpenseById_whenUserNotOwner_throwsResourceNotFound(){
+        void shouldThrowResourceNotFound_WhenUserIsNotOwner(){
             User user = new User();
             user.setId(1L);
             User owner = new User();
             owner.setId(2L);
+
             Expense expense = new Expense();
             expense.setId(2L);
             expense.setUser(owner);
@@ -147,121 +159,235 @@ class ExpenseServiceImplTest {
             when(expenseRepository.findById(expense.getId())).thenReturn(Optional.of(expense));
 
             assertThrows(ResourceNotFoundException.class, () -> {
-                expenseServiceImp.getExpenseById(expense.getId(),user.getId());
+                expenseServiceImp.getExpenseEntity(expense.getId(),user.getId());
             });
         }
         @Test
-        void getExpenseById_whenExpenseNotExist_throwsExpenseNotFound(){
-            User user = new User();
-            user.setId(1L);
-            Expense expense = new Expense();
-            expense.setId(2L);
-            expense.setUser(user);
-            when(expenseRepository.findById(expense.getId())).thenReturn(Optional.empty());
+        void shouldThrowExpenseNotFound_WhenExpenseNotExist(){
+            Long expenseId = 1L;
+            Long userId = 2L;
+            when(expenseRepository.findById(expenseId)).thenReturn(Optional.empty());
 
             assertThrows(ExpenseNotFoundException.class,() -> {
-                expenseServiceImp.getExpenseById(expense.getId(), user.getId());
+                expenseServiceImp.getExpenseEntity(expenseId, userId);
             });
         }
     }
 
+
     @Nested
-    class AddExpense{
+    class getExpenseByIdTests{
+        Long userId = 1L;
+        Long expenseId = 2L;
+        ExpenseResDTO expenseResDTO = new ExpenseResDTO(
+                expenseId,
+                BigDecimal.TEN,
+                "Lunch",
+                LocalDateTime.now(),
+                "Cash",
+                10L,
+                "Food"
+        );
+
         @Test
-        void addExpense_pass(){
-            expenseReqDTO = new ExpenseReqDTO(
-                    BigDecimal.valueOf(100),
-                    10L,
-                    "Coffee",
-                    LocalDate.now(),
-                    LocalTime.now(),
-                    "CASH"
-            );
-            User user = new User();
-            user.setId(userId);
+        void shouldReturnDTO_WhenExpenseExists(){
 
-            ExpenseCategory category = new ExpenseCategory();
-            category.setId(categoryId);
+            when(expenseRepository.findExpenseResponse(expenseId, userId))
+                    .thenReturn(Optional.of(expenseResDTO));
 
-            LocalDateTime localDateTime = LocalDateTime.of(
-                    expenseReqDTO.date(),
-                    expenseReqDTO.time()
-            );
-
-            String key = "123gfdgfdg";
-
-            when(userRepository.getReferenceById(userId)).thenReturn(user);
-            when(expenseCatRepository.findById(categoryId))
-                    .thenReturn(Optional.of(category));
-
-            when(expenseRepository.save(any(Expense.class)))
-                    .thenAnswer(i -> i.getArgument(0));
-
-            doNothing().when(reportRepository).markReportStale(userId);
-
-            AddExpenseResDTO result = expenseServiceImp
-                    .addExpense(expenseReqDTO, user.getId(), key);
+            ExpenseResDTO result = expenseServiceImp.getExpenseById(expenseId, userId);
 
             assertNotNull(result);
-
-
-            ArgumentCaptor<Expense> expenseCaptor = ArgumentCaptor.forClass(Expense.class);
-            verify(expenseRepository).save(expenseCaptor.capture());
-
-            assertEquals(100, expenseCaptor.getValue().getAmount().intValue());
-            assertEquals("Coffee", expenseCaptor.getValue().getDescription());
-            assertEquals("CASH", expenseCaptor.getValue().getPayment().toUpperCase());
-            assertEquals(category, expenseCaptor.getValue().getCategory());
-            assertEquals(user.getId(), expenseCaptor.getValue().getUser().getId());
-            assertEquals(localDateTime, expenseCaptor.getValue().getDate());
-
-            verify(reportRepository).markReportStale(userId);
-            verify(expenseCatRepository).findById(expenseReqDTO.categoryId());
-            verify(auditPublisher).publishEvent(
-                    eq(userId),
-                    eq(UserActionsCategory.USER_CREATED_EXPENSE),
-                    eq("USER"),
-                    any()
-            );
+            assertEquals(expenseResDTO.id(), result.id());
+            assertEquals(expenseResDTO.description(), result.description());
+            verify(expenseRepository, times(1))
+                    .findExpenseResponse(expenseId, userId);
         }
 
         @Test
-        void addExpense_NotValidCategory_throwException(){
-            String key = "123gfdgfdg";
-            when(expenseCatRepository.findById(categoryId))
+        void shouldThrowException_WhenExpenseNotFound(){
+            when(expenseRepository.findExpenseResponse(expenseId, userId))
                     .thenReturn(Optional.empty());
 
-            assertThrows(CategoryNotFoundException.class, () -> {
-                expenseServiceImp.addExpense(expenseReqDTO, userId, key);
+            assertThrows(ResourceNotFoundException.class, () -> {
+                expenseServiceImp.getExpenseById(expenseId, userId);
             });
+        }
+    }
 
 
+    @Nested
+    class AddExpenseTests{
+        Long userId = 1L;
+        Long categoryId = 10L;
+        @Test
+            void addExpense_pass_WhenRequestIsNew(){
+                expenseReqDTO = new ExpenseReqDTO(
+                        BigDecimal.valueOf(100),
+                        10L,
+                        "Coffee",
+                        LocalDate.now(),
+                        LocalTime.now(),
+                        "CASH"
+                );
+                User user = new User();
+                user.setId(userId);
+                String idempotencyKey = "123gfdgfdg";
+
+                ExpenseCategory category = new ExpenseCategory();
+                category.setId(categoryId);
+
+                LocalDateTime localDateTime = LocalDateTime.of(
+                        expenseReqDTO.date(),
+                        expenseReqDTO.time()
+                );
+
+                when(idempotencyRepository.findByIdempotencyKey(idempotencyKey))
+                        .thenReturn(Optional.empty());
+                when(idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS"))
+                        .thenReturn(1);
+                when(userRepository.getReferenceById(userId)).thenReturn(user);
+                when(expenseCatRepository.findById(categoryId))
+                        .thenReturn(Optional.of(category));
+
+                when(expenseRepository.save(any(Expense.class)))
+                        .thenAnswer(i -> i.getArgument(0));
+
+                doNothing().when(reportRepository).markReportStale(userId);
+
+                AddExpenseResDTO result = expenseServiceImp
+                        .addExpense(expenseReqDTO, user.getId(), idempotencyKey);
+
+                assertNotNull(result);
+                assertEquals("COMPLETED", result.status());
+
+                ArgumentCaptor<Expense> expenseCaptor = ArgumentCaptor.forClass(Expense.class);
+
+                verify(expenseRepository).save(expenseCaptor.capture());
+
+                assertEquals(100, expenseCaptor.getValue().getAmount().intValue());
+                assertEquals("Coffee", expenseCaptor.getValue().getDescription());
+                assertEquals("CASH", expenseCaptor.getValue().getPayment().toUpperCase());
+                assertEquals(category, expenseCaptor.getValue().getCategory());
+                assertEquals(user.getId(), expenseCaptor.getValue().getUser().getId());
+                assertEquals(localDateTime, expenseCaptor.getValue().getDate());
+
+                verify(reportRepository).markReportStale(userId);
+                verify(expenseCatRepository).findById(expenseReqDTO.categoryId());
+                verify(auditPublisher).publishEvent(
+                        eq(userId),
+                        eq(UserActionsCategory.USER_CREATED_EXPENSE),
+                        eq("USER"),
+                        any()
+                );
+            }
+
+            @Test
+            void addExpense_pass_WhenRequestAlreadyProcessed_Completed(){
+                    expenseReqDTO = new ExpenseReqDTO(
+                            BigDecimal.valueOf(100),
+                            10L,
+                            "Coffee",
+                            LocalDate.now(),
+                            LocalTime.now(),
+                            "CASH"
+                    );
+
+                    User user = new User();
+                    user.setId(userId);
+                    String idempotencyKey = "123gfdgfdg";
+
+                    IdempotentRecords record = new IdempotentRecords();
+                    record.setId(100L);
+                    record.setIdempotencyKey(idempotencyKey);
+                    record.setStatus("COMPLETED");
+
+                    when(idempotencyRepository.findByIdempotencyKey(idempotencyKey))
+                            .thenReturn(Optional.of(record));
+
+                    AddExpenseResDTO result = expenseServiceImp
+                            .addExpense(expenseReqDTO, user.getId(), idempotencyKey);
+
+                    assertNotNull(result);
+                    assertEquals("COMPLETED", result.status());
+
+                verify(expenseRepository, never()).save(any(Expense.class));
+                verify(userRepository, never()).getReferenceById(anyLong());
+                verify(auditPublisher, never()).publishEvent(anyLong(), any(), anyString(), any());
+            }
+
+            @Test
+            void addExpense_ShouldReturnInProgress_WhenConcurrentRequestDetected(){
+                expenseReqDTO = new ExpenseReqDTO(
+                        BigDecimal.valueOf(100),
+                        10L,
+                        "Coffee",
+                        LocalDate.now(),
+                        LocalTime.now(),
+                        "CASH"
+                );
+
+                User user = new User();
+                user.setId(userId);
+                String idempotencyKey = "123gfdgfdg";
+
+                when(idempotencyRepository.findByIdempotencyKey(idempotencyKey))
+                        .thenReturn(Optional.empty());
+
+                when(idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS"))
+                        .thenReturn(0);
+
+                AddExpenseResDTO result = expenseServiceImp
+                        .addExpense(expenseReqDTO, user.getId(), idempotencyKey);
+
+                assertNotNull(result);
+                assertEquals("IN_PROGRESS", result.status());
+
+                verify(expenseRepository, never()).save(any(Expense.class));
+                verify(auditPublisher, never()).publishEvent(anyLong(), any(), anyString(), any());
+            }
+
+
+
+        @Test
+        void addExpense_NotValidCategory_throwException(){
+            String idempotencyKey = "123gfdgfdg";
+            IdempotentRecords record = new IdempotentRecords();
+            record.setId(100L);
+            record.setIdempotencyKey(idempotencyKey);
+            record.setStatus("COMPLETED");
+
+            when(idempotencyRepository.findByIdempotencyKey(idempotencyKey))
+                    .thenReturn(Optional.empty());
+            when(idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS"))
+                    .thenReturn(1);
+            when(expenseCatRepository.findById(categoryId))
+                    .thenReturn(Optional.empty());
+            assertThrows(CategoryNotFoundException.class, () -> {
+                expenseServiceImp.addExpense(expenseReqDTO, userId, idempotencyKey);
+            });
             verify(expenseRepository, never()).save(any());
             verify(reportRepository, never()).markReportStale(any());
             verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
         }
     }
 
+
     @Nested
-    class UpdateExpense{
+    class UpdateExpenseTests{
+        Long userId = 10L;
+        Long expenseId = 20L;
+
         @Test
         void updateExpense_success(){
-            Long userId = 10L;
-            Long expenseId = 20L;
-            expenseReqDTO = new ExpenseReqDTO(
-                    BigDecimal.valueOf(100),
-                    10L,
-                    "Coffee",
-                    LocalDate.now(),
-                    LocalTime.now(),
-                    "CASH"
-            );
-
             User user = new User();
             user.setId(userId);
 
-            ExpenseCategory category = new ExpenseCategory();
-            category.setId(categoryId);
+            ExpenseCategory oldCategory = new ExpenseCategory();
+            oldCategory.setId(40L);
+
+            ExpenseCategory newCategory = new ExpenseCategory();
+            newCategory.setId(10L);
 
             LocalDateTime localDateTime = LocalDateTime.of(
                 expenseReqDTO.date(),
@@ -270,38 +396,38 @@ class ExpenseServiceImplTest {
 
             Expense expense = new Expense();
             expense.setId(expenseId);
-            expense.setAmount(BigDecimal.valueOf(100));
-            expense.setDescription("Coffee");
+            expense.setAmount(BigDecimal.valueOf(199));
+            expense.setDescription("Shoes");
             expense.setPayment("CASH");
-            expense.setDate(LocalDateTime.now());
+            expense.setDate(LocalDateTime.of(2025, 5, 10, 8, 0));
             expense.setUser(user);
-            expense.setCategory(category);
+            expense.setCategory(oldCategory);
 
             when(expenseRepository.findById(expenseId))
                     .thenReturn(Optional.of(expense));
-            when(expenseCatRepository.findById(categoryId))
-                    .thenReturn(Optional.of(category));
+            when(expenseCatRepository.findById(expenseReqDTO.categoryId()))
+                    .thenReturn(Optional.of(newCategory));
 
             when(expenseRepository.save(any(Expense.class)))
                     .thenAnswer(i -> i.getArgument(0));
-
 
             ExpenseResDTO result = expenseServiceImp.updateExpense(expenseId, expenseReqDTO, userId);
 
             assertEquals(expenseReqDTO.amount(), result.amount());
             assertEquals(expenseReqDTO.description(), result.description());
             assertEquals(expenseReqDTO.payment(), result.payment());
-            assertEquals(categoryId, result.categoryId());
+            assertEquals(newCategory.getId(), result.categoryId());
 
             ArgumentCaptor<Expense> expenseCaptor = ArgumentCaptor.forClass(Expense.class);
             verify(expenseRepository).save(expenseCaptor.capture());
 
             Expense capturedExpense = expenseCaptor.getValue();
-            assertEquals(BigDecimal.valueOf(100), capturedExpense.getAmount());
-            assertEquals("Coffee", capturedExpense.getDescription());
-            assertEquals("CASH", capturedExpense.getPayment());
-            assertEquals(localDateTime, capturedExpense.getDate());
-            assertEquals(10L, capturedExpense.getCategory().getId());
+
+            assertEquals(expenseReqDTO.amount(), capturedExpense.getAmount());
+            assertEquals(expenseReqDTO.description(), capturedExpense.getDescription());
+            assertEquals(expenseReqDTO.payment(), capturedExpense.getPayment());
+            assertEquals(expenseReqDTO.categoryId(), capturedExpense.getCategory().getId());
+            assertEquals(LocalDateTime.of(expenseReqDTO.date(), expenseReqDTO.time()), capturedExpense.getDate());
 
 
             verify(reportRepository).markReportStale(userId);
@@ -314,32 +440,40 @@ class ExpenseServiceImplTest {
         };
 
         @Test
-        void updateExpense_expenseNotFound_shouldThrow(){
-            User user = new User();
-            user.setId(userId);
-
+        void shouldThrowExpenseNotFound(){
             when(expenseRepository.findById(expenseId))
                     .thenReturn(Optional.empty());
 
             assertThrows(ExpenseNotFoundException.class, () -> {
                 expenseServiceImp.updateExpense(expenseId, expenseReqDTO, userId);
             });
+
+            verify(expenseRepository, never()).save(any());
+            verify(reportRepository, never()).markReportStale(anyLong());
+            verify(auditPublisher, never()).publishEvent(anyLong(), any(), anyString(), any());
         }
 
         @Test
-        void updateExpense_categoryNotFound_shouldThrow(){
+        void shouldThrowCategoryNotFound(){
             User user = new User();
             user.setId(userId);
+
 
             Expense expense = new Expense();
             expense.setId(expenseId);
             expense.setUser(user);
-            when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
-            when(expenseCatRepository.findById(categoryId)).thenReturn(Optional.empty());
+            when(expenseRepository.findById(expenseId))
+                    .thenReturn(Optional.of(expense));
+            when(expenseCatRepository.findById(expenseReqDTO.categoryId()))
+                    .thenReturn(Optional.empty());
 
             assertThrows(CategoryNotFoundException.class, () -> {
                 expenseServiceImp.updateExpense(expenseId, expenseReqDTO, userId);
             });
+
+            verify(expenseRepository, never()).save(any());
+            verify(reportRepository, never()).markReportStale(any());
+            verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
         }
 
         @Test
@@ -359,11 +493,17 @@ class ExpenseServiceImplTest {
             assertThrows(ResourceNotFoundException.class, () -> {
                 expenseServiceImp.updateExpense(expenseId, expenseReqDTO, userId);
             });
+
+            verify(expenseRepository, never()).save(any(Expense.class));
+            verify(reportRepository, never()).markReportStale(anyLong());
+            verify(auditPublisher, never()).publishEvent(anyLong(), any(), anyString(), any());
         }
     }
 
     @Nested
-    class deleteExpense{
+    class deleteExpenseTests{
+        Long userId = 10L;
+        Long expenseId = 20L;
 
         @Test
         void deleteExpense_pass(){
@@ -380,6 +520,7 @@ class ExpenseServiceImplTest {
           expenseServiceImp.deleteExpense(expenseId, userId);
 
           verify(expenseRepository).deleteById(expenseId);
+
           verify(reportRepository).markReportStale(userId);
           verify(auditPublisher).publishEvent(
                   eq(userId),
@@ -390,7 +531,7 @@ class ExpenseServiceImplTest {
         }
 
         @Test
-        void deleteExpense_ExpenseNotFound_shouldThrow(){
+        void shouldThrowExpenseNotFound(){
             when(expenseRepository.findById(expenseId)).thenReturn(Optional.empty());
 
             assertThrows(ExpenseNotFoundException.class, () -> {
@@ -404,7 +545,7 @@ class ExpenseServiceImplTest {
 
 
         @Test
-        void deleteExpense_NotExpenseOwner_shouldThrow(){
+        void shouldThrowResourceNotFound(){
             User someOther = new User();
             someOther.setId(5L);
 

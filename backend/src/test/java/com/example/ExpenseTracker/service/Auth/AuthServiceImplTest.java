@@ -72,7 +72,7 @@ public class AuthServiceImplTest {
     AuthServiceImpl authService;
 
 
-    private RegisterRequestDTO requestDTO;
+    private RegisterRequestDTO registerRequestDTO;
     private LoginRequestDTO loginRequestDTO;
     private Roles role;
     private Authentication authentication;
@@ -84,7 +84,7 @@ public class AuthServiceImplTest {
 
     @BeforeEach
     void setUp(){
-        requestDTO = new RegisterRequestDTO(
+        registerRequestDTO = new RegisterRequestDTO(
                 "Nikos",
                 "email@test.com",
                 "Kavalas2",
@@ -106,17 +106,15 @@ public class AuthServiceImplTest {
             role.setId(1L);
             role.setRoleType(RoleCategory.ROLE_USER);
             doNothing().when(tikaService).validateFile(any());
-            when(userRepository.createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            )).thenReturn(1);
+
+            when(userRepository.existsByEmail(registerRequestDTO.email()))
+                    .thenReturn(false);
 
             when(rolesRepository.findByRoleType(RoleCategory.ROLE_USER))
                     .thenReturn(Optional.of(role));
             when(cloudinaryService.uploadImageProfile(any(),any()))
                     .thenReturn("fake-url");
-            when(passwordEncoder.encode(requestDTO.password()))
+            when(passwordEncoder.encode(registerRequestDTO.password()))
                     .thenReturn("hashedPassword");
             when(userRepository.save(any()))
                     .thenAnswer(i -> {
@@ -125,7 +123,7 @@ public class AuthServiceImplTest {
                        return user;
                     });
 
-            RegisterResDTO result = authService.saveUser(requestDTO);
+            RegisterResDTO result = authService.saveUser(registerRequestDTO);
 
             assertEquals( "Registration was successful", result.message());
 
@@ -133,23 +131,18 @@ public class AuthServiceImplTest {
             verify(userRepository).save(userCaptor.capture());
 
             assertEquals("fake-url", userCaptor.getValue().getImageProfile());
-            assertEquals(requestDTO.email(),userCaptor.getValue().getEmail());
+            assertEquals(registerRequestDTO.email(),userCaptor.getValue().getEmail());
             assertEquals("hashedPassword", userCaptor.getValue().getPassword());
-            assertEquals(requestDTO.username(), userCaptor.getValue().getUsername());
+            assertEquals(registerRequestDTO.username(), userCaptor.getValue().getUsername());
             assertTrue(userCaptor.getValue().getRoles().contains(role));
 
             verify(tikaService).validateFile(any());
-            verify(userRepository).createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            );
-
+            verify(userRepository).existsByEmail(registerRequestDTO.email());
             verify(cloudinaryService).uploadImageProfile(
-                    eq(requestDTO.imageProfile()),
-                    eq(requestDTO.email())
+                    eq(registerRequestDTO.imageProfile()),
+                    eq(registerRequestDTO.email())
             );
-            verify(passwordEncoder).encode(requestDTO.password());
+            verify(passwordEncoder).encode(registerRequestDTO.password());
             verify(auditPublisher).publishEvent(
                    eq(userId),
                    eq(UserActionsCategory.USER_REGISTERED),
@@ -164,96 +157,86 @@ public class AuthServiceImplTest {
                     .when(tikaService).validateFile(any());
 
            assertThrows(InvalidFileTypeException.class, ()->{
-               authService.saveUser(requestDTO);
+               authService.saveUser(registerRequestDTO);
            });
 
+            verify(userRepository, never()).existsByEmail(any());
             verify(userRepository, never()).save(any());
             verify(cloudinaryService, never()).uploadImageProfile(any(), any());
             verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
+            verify(passwordEncoder, never()).encode(any());
         }
 
         @Test
         void saveUser_EmailAlreadyExists_throwsException(){
             doNothing().when(tikaService).validateFile(any());
 
-            when(userRepository.createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            )).thenReturn(0);
-
+            when(userRepository.existsByEmail(registerRequestDTO.email()))
+                    .thenReturn(true);
 
             assertThrows(EmailAlreadyExistsException.class, () -> {
-                authService.saveUser(requestDTO);
+                authService.saveUser(registerRequestDTO);
             });
 
-
-            verify(userRepository).createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            );
+            verify(userRepository).existsByEmail(registerRequestDTO.email());
             verify(cloudinaryService, never()).uploadImageProfile(any(), any());
             verify(userRepository, never()).save(any());
+            verify(passwordEncoder, never()).encode(any());
+            verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
+            verify(rolesRepository, never()).findByRoleType(any());
+
         }
 
         @Test
         void saveUser_CloudinaryFailedUploadImage_throwsException(){
             doNothing().when(tikaService).validateFile(any());
-
-            when(userRepository.createIfNotExists(any(), any(), any()))
-                    .thenReturn(1);
-
+            when(userRepository.existsByEmail(registerRequestDTO.email()))
+                    .thenReturn(false);
             when(cloudinaryService.uploadImageProfile(
-                    requestDTO.imageProfile(),
-                    requestDTO.email())
+                    registerRequestDTO.imageProfile(),
+                    registerRequestDTO.email())
             ).thenThrow(new CloudinaryException("Cloudinary failed to upload image"));
 
             assertThrows(CloudinaryException.class, () -> {
-                authService.saveUser(requestDTO);
+                authService.saveUser(registerRequestDTO);
             });
 
 
-            verify(userRepository).createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            );
             verify(cloudinaryService).uploadImageProfile(
-                    requestDTO.imageProfile(),
-                    requestDTO.email()
+                    registerRequestDTO.imageProfile(),
+                    registerRequestDTO.email()
             );
             verify(userRepository, never()).save(any());
+            verify(passwordEncoder, never()).encode(any());
+            verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
+            verify(rolesRepository, never()).findByRoleType(any());
         }
 
         @Test
         void saveUser_roleNotExist_throwsException(){
             doNothing().when(tikaService).validateFile(any());
-
-            when(userRepository.createIfNotExists(any(), any(), any()))
-                    .thenReturn(1);
-
-            when(cloudinaryService.uploadImageProfile(any(), any()))
-                    .thenReturn("image-url");
+            when(userRepository.existsByEmail(registerRequestDTO.email()))
+                    .thenReturn(false);
+            when(cloudinaryService.uploadImageProfile(
+                    registerRequestDTO.imageProfile(),
+                    registerRequestDTO.email()))
+                        .thenReturn("image-url");
 
             when(rolesRepository.findByRoleType(RoleCategory.ROLE_USER))
                     .thenReturn(Optional.empty());
 
             assertThrows(RuntimeException.class, () -> {
-                authService.saveUser(requestDTO);
+                authService.saveUser(registerRequestDTO);
             });
 
-
-            verify(userRepository).createIfNotExists(
-                    requestDTO.username(),
-                    requestDTO.email(),
-                    requestDTO.password()
-            );
+            verify(rolesRepository).findByRoleType(RoleCategory.ROLE_USER);
             verify(cloudinaryService).uploadImageProfile(
-                    requestDTO.imageProfile(),
-                    requestDTO.email()
+                    registerRequestDTO.imageProfile(),
+                    registerRequestDTO.email()
             );
             verify(userRepository, never()).save(any());
+            verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
+            verify(passwordEncoder).encode(registerRequestDTO.password());
         }
     }
 
@@ -342,6 +325,7 @@ public class AuthServiceImplTest {
             assertThrows(RuntimeException.class, () ->
                     authService.userLogin(loginRequestDTO)
             );
+
             verify(jwtUtils).generateToken(any());
             verify(auditPublisher, never()).publishEvent(any(), any(), any(), any());
         }
@@ -364,6 +348,7 @@ public class AuthServiceImplTest {
                     "newEmail@gmail.com"
             );
 
+
             when(userRepository.findByEmailBasic(userId))
                     .thenReturn(Optional.of(user));
 
@@ -377,6 +362,8 @@ public class AuthServiceImplTest {
            assertEquals("newEmail@gmail.com", result.email());
 
            verify(userRepository).findByEmailBasic(userId);
+           verify(userRepository).save(user);
+            verify(cache).invalidate("test@gmail.com");
         }
         @Test
         void changeAccountInfo_invalidUsernameAndValidEmail_success(){
@@ -405,6 +392,9 @@ public class AuthServiceImplTest {
             assertEquals("Updated account successfully", result.message());
 
             verify(userRepository).findByEmailBasic(user.getId());
+            verify(userRepository).save(user);
+            verify(cache).invalidate("test@gmail.com");
+
         }
 
         @Test
@@ -434,6 +424,9 @@ public class AuthServiceImplTest {
             assertEquals("Updated account successfully", result.message());
 
             verify(userRepository).findByEmailBasic(user.getId());
+            verify(userRepository).save(user);
+            verify(cache).invalidate("test@gmail.com");
+
         }
 
         @Test
@@ -450,6 +443,8 @@ public class AuthServiceImplTest {
             });
 
             verify(userRepository).findByEmailBasic(userId);
+            verify(cache, never()).invalidate("test@gmail.com");
+
         }
 
         @Test
@@ -474,6 +469,8 @@ public class AuthServiceImplTest {
             });
 
             verify(userRepository).findByEmailBasic(user.getId());
+            verify(cache, never()).invalidate("test@gmail.com");
+
         }
 
 
@@ -504,6 +501,7 @@ public class AuthServiceImplTest {
             assertEquals("success", result.status());
             assertEquals("hashedPass", user.getPassword());
 
+            verify(userRepository).save(user);
             verify(userRepository).findByEmailBasic(user.getId());
             verify(passwordEncoder).encode(updatePasswordReqDTO.password());
             verify(cache).invalidate(user.getEmail());
@@ -521,6 +519,9 @@ public class AuthServiceImplTest {
             });
 
             verify(userRepository).findByEmailBasic(userId);
+            verify(passwordEncoder, never()).encode(updatePasswordReqDTO.password());
+            verify(cache, never()).invalidate("test@gmail.com");
+
         }
     }
 }

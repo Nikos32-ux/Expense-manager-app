@@ -128,7 +128,11 @@ public class AuthServiceImpl implements AuthService {
         if(StringUtils.hasText(updateAccount.email())){
             user.setEmail(updateAccount.email());
         }
+
+        userRepository.save(user);
+
         cache.invalidate(oldEmail);
+
         return new UpdateAccountResDTO(
                 user.getUsername(),
                 user.getEmail(),
@@ -143,6 +147,8 @@ public class AuthServiceImpl implements AuthService {
         String convertedPassword = passwordEncoder.encode(updatePassword.password());
 
         user.setPassword(convertedPassword);
+
+        userRepository.save(user);
         cache.invalidate(user.getEmail());
         return new UpdatePasswordResDTO("success","Updated password successfully");
     }

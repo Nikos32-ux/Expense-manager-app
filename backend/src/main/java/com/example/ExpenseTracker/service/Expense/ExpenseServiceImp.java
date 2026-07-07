@@ -90,7 +90,8 @@ public class ExpenseServiceImp implements ExpenseService {
 
     @Transactional(readOnly = true)
     public ExpenseResDTO getExpenseById(Long expenseId, Long userId) {
-        return ExpenseMapper.mapToDTO(getExpenseEntity(expenseId, userId));
+        return expenseRepository.findExpenseResponse(expenseId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
     }
 
     @Override

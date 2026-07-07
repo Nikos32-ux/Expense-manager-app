@@ -44,6 +44,25 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     Page<ExpenseResDTO> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
+             select new com.example.ExpenseTracker.dto.ExpenseResDTO(
+                                  e.id,
+                                  e.amount,
+                                  e.description,
+                                  e.date,
+                                  e.payment,
+                                  c.id,
+                                  c.category
+                              )
+                              from Expense e
+                              join e.category c
+                              where e.user.id = :userId
+                              and e.id = :expenseId
+            """)
+    Optional<ExpenseResDTO> findExpenseResponse(@Param("expenseId") Long expenseId ,
+                                                @Param("userId") Long userId
+                                                );
+
+    @Query("""
     SELECT
         EXTRACT(MONTH from e.date) AS month,
         SUM(e.amount) AS amount

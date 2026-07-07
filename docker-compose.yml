@@ -8,6 +8,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    
+    mem_limit: 256m
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -22,6 +24,7 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    mem_limit: 128m
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
       interval: 10s
@@ -34,6 +37,7 @@ services:
     container_name: global-proxy
     ports:
       - "80:80"
+    mem_limit: 64m
     depends_on:
       expense-app:
         condition: service_started
@@ -41,6 +45,7 @@ services:
   expense-app:
     image: nikosdev/expense-tracker:latest
     container_name: expense-app
+    mem_limit: 512m
     depends_on:
       postgres:
         condition: service_healthy

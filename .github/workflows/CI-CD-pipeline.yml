@@ -1,0 +1,89 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  backend-build:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy monorepo
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Persist mvn dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{runner.os}}-maven-${{hashFiles('**/pom.xml')}}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run JUnit Tests
+        run: mvn -B test
+        working-directory: ./backend
+
+      - name: Build app
+        run: mvn clean package -DskipTests
+        working-directory: ./backend
+
+      - name: Login to Dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{secrets.BACKEND_IMAGE_PREFIX}}/expense-tracker-backend:latest
+
+  frontend-build:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy monorepo
+        uses: actions/checkout@v2
+
+      - name: Login to Dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{secrets.FRONTEND_IMAGE_PREFIX}}/expense-gateway:latest
+
+  deploy:
+    name: CD - connect to ec2 and start containers
+    needs: [backend-build, frontend-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: connect to ec2 and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{secrets.EC2_IP}}
+          username: ${{secrets.EC2_USER}}
+          key: ${{secrets.EC2_SSH_KEY}}
+          script: |
+            cd prod-app 
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker compose pull 
+            docker compose down
+            docker compose up -d
+            docker system prune -f

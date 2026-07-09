@@ -67,12 +67,12 @@ const AddExpense = () => {
 
     if (data?.fieldErrors) {
       setFieldErrors(data.fieldErrors);
-      errorTimer = setTimeout(() => { setFieldErrors(null); }, 10000);
+      errorTimer = setTimeout(() => { setFieldErrors(null); }, 3000);
     }
 
     if (data?.serverErrors) {
       setServerErrors(data.serverErrors);
-      errorTimer = setTimeout(() => { setServerErrors(null); }, 10000);
+      errorTimer = setTimeout(() => { setServerErrors(null); }, 3000);
     }
 
 

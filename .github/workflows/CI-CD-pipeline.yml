@@ -70,17 +70,19 @@ jobs:
           tags: ${{secrets.FRONTEND_IMAGE_PREFIX}}/expense-gateway:latest
 
   deploy:
-    name: CD - connect to ec2 and start containers
-    needs: [backend-build, frontend-build]
+    name: CD - Deploy through AWS Systems Manager
+    needs: [ backend-build, frontend-build ]
     runs-on: ubuntu-latest
+
     permissions:
       id-token: write
       contents: read
+
     steps:
-      - name:  Configure AWS credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{secrets.AWS_ARN}}
+          role-to-assume: ${{ secrets.AWS_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to EC2 using SSM

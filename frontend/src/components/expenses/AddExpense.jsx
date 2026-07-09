@@ -59,6 +59,7 @@ const AddExpense = () => {
 
       queryClient.invalidateQueries({ queryKey: ["month-expenses-total"], exact: true });
       queryClient.invalidateQueries({ queryKey: ["dashboard-expenses"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["category-total"]});
       queryClient.invalidateQueries({ queryKey: ["expenses"], exact: true });
       navigate("/dashboard", { state: { success: data?.success } });
 

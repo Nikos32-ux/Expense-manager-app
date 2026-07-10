@@ -47,7 +47,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{secrets.BACKEND_IMAGE_PREFIX}}/expense-tracker-backend:latest
+          tags: ${{secrets.BACKEND_IMAGE_PREFIX}}/expense-tracker:latest
 
   frontend-build:
     name: Frontend CI
@@ -63,16 +63,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Inspect frontend build context
-        run: |
-          ls -la ./frontend
-          ls -la ./frontend/.env* || true
       - name: Build and Push Frontend
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_WS_URL=${{ vars.VITE_WS_URL }}
           tags: ${{secrets.FRONTEND_IMAGE_PREFIX}}/expense-gateway:latest
 
   deploy:

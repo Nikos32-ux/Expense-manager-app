@@ -69,9 +69,6 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL }}
-            VITE_WS_URL=${{ vars.VITE_WS_URL }}
           tags: ${{secrets.FRONTEND_IMAGE_PREFIX}}/expense-gateway:latest
 
   deploy:

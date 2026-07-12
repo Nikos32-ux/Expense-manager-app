@@ -93,7 +93,9 @@ jobs:
           --document-name "AWS-RunShellScript" \
           --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
           --parameters 'commands=[
-            "cd prod-app",
+            "cd /home/ubuntu/prod-app",
+            "pwd",
+            "ls",
             "echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin",
             "docker compose pull",
             "docker compose down",

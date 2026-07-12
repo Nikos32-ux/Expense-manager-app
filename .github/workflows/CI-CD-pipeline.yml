@@ -95,8 +95,8 @@ jobs:
           --parameters 'commands=[
             "cd /home/ubuntu/prod-app",
             "echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin",
-            "docker-compose pull",
-            "docker-compose down",
-            "docker-compose up -d",
+            "/home/ubuntu/.docker/cli-plugins/docker-compose pull",
+            "/home/ubuntu/.docker/cli-plugins/docker-compose down",
+            "/home/ubuntu/.docker/cli-plugins/docker-compose up -d",
             "docker system prune -f"
           ]'

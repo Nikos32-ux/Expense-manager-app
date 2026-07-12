@@ -94,11 +94,9 @@ jobs:
           --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
           --parameters 'commands=[
             "cd /home/ubuntu/prod-app",
-            "pwd",
-            "ls",
             "echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin",
-            "docker compose pull",
-            "docker compose down",
-            "docker compose up -d",
+            "docker-compose pull",
+            "docker-compose down",
+            "docker-compose up -d",
             "docker system prune -f"
           ]'

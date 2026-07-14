@@ -5,6 +5,7 @@ const api = axios.create({
     withCredentials: true,
 });
 
+console.error("Base url", api.defaults.baseURL)
 api.interceptors.response.use(
     (response) => {
         return response;

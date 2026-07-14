@@ -63,7 +63,7 @@ public class ExpenseServiceImp implements ExpenseService {
     @Cacheable(value = "category-total-amount", key = "#userId + '_' + #categoryFilterDTO")
     public List<CategoryTotalDTO> estimateCategoryTotal( CategoryFilterDTO categoryFilterDTO, Long userId){
         LocalDateTime startDate = DateUtils.processFilter(categoryFilterDTO.filter());
-        return expenseRepository.findCategoryTotal(userId, startDate);
+        return expenseRepository.findCategoryTotal(userId, startDate); 
     }
 
     @Override

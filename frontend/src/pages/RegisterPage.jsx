@@ -201,7 +201,13 @@ const RegisterPage = () => {
                 : "Sign up"}
             </button>
           </div>
+          <div className={"flex items-center mt-2"}>
 
+          <p>Already a member?</p>
+           <Link to={"/login"} className={`text-blue-400 text-[15px] font-semibold ml-2 hover:text-blue-300 transition-colors ${navigation.state === "submitting" ? "opacity-50 pointer-events-none" : ""} `}>
+            Sign in
+           </Link>
+          </div>
         </Form>
       </div>
     </div>

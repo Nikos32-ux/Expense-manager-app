@@ -81,7 +81,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
                    SUM(e.amount) as total
                FROM expenses e
                JOIN expense_categories ec ON e.category_id = ec.id
-               WHERE e.created_at BETWEEN :startDate AND NOW()
+               WHERE e.date BETWEEN :startDate AND NOW()
                AND e.user_id = :userId
                GROUP BY ec.category
             """, nativeQuery = true)

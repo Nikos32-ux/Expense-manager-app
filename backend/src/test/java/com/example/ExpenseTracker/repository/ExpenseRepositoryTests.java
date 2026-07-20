@@ -263,23 +263,22 @@ public class ExpenseRepositoryTests extends AbstractPostgresTestContainer {
                 expense.setUser(savedUser);
                 expense.setCategory(category);
                 expense.setAmount(BigDecimal.valueOf(200));
-                expense.setDate(LocalDateTime.now().minusMonths(1));
+                expense.setDate(LocalDateTime.of(2026, 7, 10, 13, 41, 0));
                 expense.setDescription("Test_" + i);
                 expense.setPayment("card");
-
                 expenseRepository.save(expense);
             }
         }
 
         @Test
-        void shouldReturnCategoryTotals_whenExpensesExistWithinDateRange(){
+        void shouldReturnSingleCategoryTotal_whenMultipleExpensesBelongToSameCategory(){
             createExpensesForUser(savedUser, 2);
-            LocalDateTime startDate = LocalDateTime.now().minusMonths(1);
+            LocalDateTime startDate = LocalDateTime.of(2026, 6, 1, 13, 41, 0);
 
             List<CategoryTotalDTO> result =
                    expenseRepository.findCategoryTotal(savedUser.getId(), startDate);
 
-            assertThat(result).isNotEmpty();
+            assertThat(result).isNotEmpty().hasSize(1);
             assertThat(result.getFirst().getCategory()).isEqualTo("Housing");
             assertThat(result.getFirst().getTotal()).isEqualTo(400.0);
         }
@@ -291,14 +290,14 @@ public class ExpenseRepositoryTests extends AbstractPostgresTestContainer {
                 expense.setUser(savedUser);
                 expense.setCategory(category);
                 expense.setAmount(BigDecimal.valueOf(100));
-                expense.setDate(LocalDateTime.now().minusMonths(2));
+                expense.setDate(LocalDateTime.of(2026, 5, 3, 13, 41, 0));
                 expense.setDescription("Test_" + i);
                 expense.setPayment("card");
 
                 expenseRepository.save(expense);
             }
 
-            LocalDateTime startDate = LocalDateTime.now().minusMonths(1);
+            LocalDateTime startDate = LocalDateTime.of(2026, 6, 1, 13, 41, 0);
 
             List<CategoryTotalDTO> result =
                     expenseRepository.findCategoryTotal(savedUser.getId(), startDate);
@@ -319,24 +318,27 @@ public class ExpenseRepositoryTests extends AbstractPostgresTestContainer {
             otherCategoryExpense.setUser(savedUser);
             otherCategoryExpense.setCategory(secondCategory);
             otherCategoryExpense.setAmount(BigDecimal.valueOf(200));
-            otherCategoryExpense.setDate(LocalDateTime.now().minusMonths(1));
+            otherCategoryExpense.setDate(LocalDateTime.of(2026, 7, 10, 13, 41, 0));
             otherCategoryExpense.setDescription("Test2");
             otherCategoryExpense.setPayment("card");
 
                 expenseRepository.save(otherCategoryExpense);
 
 
-            LocalDateTime startDate = LocalDateTime.now().minusMonths(1);
+            LocalDateTime startDate = LocalDateTime.of(2026, 6, 1, 13, 41, 0);
 
             List<CategoryTotalDTO> result =
                     expenseRepository.findCategoryTotal(savedUser.getId(), startDate);
 
-            assertThat(result).isNotEmpty();
-            assertThat(result.getFirst().getTotal()).isEqualTo(200.0);
-            assertThat(result.getFirst().getCategory()).isEqualTo("Housing");
+            assertThat(result).isNotEmpty().hasSize(2);
 
-            assertThat(result.get(1).getTotal()).isEqualTo(200.0);
-            assertThat(result.get(1).getCategory()).isEqualTo("Utilities");
+            assertThat(result)
+                    .extracting(CategoryTotalDTO::getTotal)
+                    .containsExactlyInAnyOrder(200.0, 200.0);
+            assertThat(result)
+                    .extracting(CategoryTotalDTO::getCategory)
+                    .containsExactlyInAnyOrder("Housing", "Utilities");
+
         }
     }
 

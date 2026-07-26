@@ -20,28 +20,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT u FROM User u WHERE u.id = :userId")
     Optional<User> findByEmailBasic(@Param("userId") Long userId);
-
-    @Modifying
-    @Query(value = """
-            INSERT INTO users(username, email, password, image_profile)
-            VALUES(:username, :email, :password, NULL)
-            ON CONFLICT(email) DO NOTHING
-            """, nativeQuery = true)
-    Integer createIfNotExists(
-            @Param("username") String username,
-            @Param("email") String email,
-            @Param("password") String password
-    );
-
-    @Query("""
-        SELECT new com.example.ExpenseTracker.dto.LoginResDTO(
-            u.id,
-            u.username,
-            u.email,
-            u.imageProfile
-        )
-        FROM User u
-        WHERE u.email = :email
-        """)
-    Optional<LoginResDTO> fetchSimpleUser(@Param("email") String email);
 };

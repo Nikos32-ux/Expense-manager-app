@@ -4,12 +4,13 @@ import com.example.ExpenseTracker.dto.ExpenseReportDTO;
 import com.example.ExpenseTracker.dto.ExpenseResDTO;
 import com.example.ExpenseTracker.dto.MonthExpensesTotalInterface;
 import com.example.ExpenseTracker.model.*;
-import com.example.ExpenseTracker.testsupport.AbstractPostgresTestContainer;
+import com.example.ExpenseTracker.testsupport.PostgresTestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,8 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-public class ExpenseRepositoryTests extends AbstractPostgresTestContainer {
+@Import(PostgresTestcontainersConfiguration.class)
+public class ExpenseRepositoryTests {
 
     @Autowired
     ExpenseRepository expenseRepository;

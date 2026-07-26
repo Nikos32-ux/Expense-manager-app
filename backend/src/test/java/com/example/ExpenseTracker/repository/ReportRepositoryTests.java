@@ -4,18 +4,21 @@ import com.example.ExpenseTracker.model.Report;
 import com.example.ExpenseTracker.model.RoleCategory;
 import com.example.ExpenseTracker.model.Roles;
 import com.example.ExpenseTracker.model.User;
-import com.example.ExpenseTracker.testsupport.AbstractPostgresTestContainer;
+import com.example.ExpenseTracker.testsupport.PostgresTestcontainersConfiguration;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Optional;
 
 @DataJpaTest
-public class ReportRepositoryTests extends AbstractPostgresTestContainer {
+@Import(PostgresTestcontainersConfiguration.class)
+public class ReportRepositoryTests{
 
     @Autowired
     EntityManager entityManager;

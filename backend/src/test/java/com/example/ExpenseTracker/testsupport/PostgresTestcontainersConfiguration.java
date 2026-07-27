@@ -9,7 +9,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class PostgresTestcontainersConfiguration {
 
     @Bean
-
     @ServiceConnection
      PostgreSQLContainer<?> testDatabase() {
         return new PostgreSQLContainer<>("postgres:16-alpine");

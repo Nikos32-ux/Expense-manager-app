@@ -4,11 +4,40 @@ on:
   push:
     branches:
       - main
-      - debug/frontend-build
+
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  changes:
+    name: Detect changes via file checking
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+
+    steps:
+      - name: Copy remote repository into runner
+        uses: actions/checkout@v4
+
+      - name: Perform file checking for changes
+        uses: dorny/paths-filters@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+             - 'backend/**'
+            frontend:
+             - 'frontend/**'
+    
+
+
+
   backend-build:
     name: Backend CI
+    needs: changes
+    if: needs.changes.outputs.backend = 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Copy monorepo
@@ -36,12 +65,14 @@ jobs:
         working-directory: ./backend
 
       - name: Login to Dockerhub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Backend
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/build-push-action@v4
         with:
           context: ./backend
@@ -51,19 +82,22 @@ jobs:
 
   frontend-build:
     name: Frontend CI
+    needs: changes
+    if: needs.changes.outputs.frontend = 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Copy monorepo
         uses: actions/checkout@v2
 
-
       - name: Login to Dockerhub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Frontend
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
@@ -74,6 +108,12 @@ jobs:
   deploy:
     name: CD - Deploy through AWS Systems Manager
     needs: [ backend-build, frontend-build ]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.backend-build.result != 'failure' &&
+      needs.frontend-build.result != 'failure'
     runs-on: ubuntu-latest
 
     permissions:

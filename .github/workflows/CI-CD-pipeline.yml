@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Perform file checking for changes
-        uses: dorny/paths-filters@v3
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |

@@ -46,7 +46,7 @@ public class ExpenseController {
 
     @GetMapping("get-expenses")
     public ResponseEntity<Page<ExpenseResDTO>> getExpenses(
-            @ModelAttribute ExpensesFilters filters,
+            @Valid @ModelAttribute ExpensesFilters filters,
             @PageableDefault(size = 5, sort = "date", direction = Sort.Direction.DESC) Pageable pageable
     ){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();

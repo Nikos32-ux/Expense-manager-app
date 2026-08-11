@@ -1,5 +1,6 @@
 package com.example.ExpenseTracker.exception;
 import com.example.ExpenseTracker.dto.GlobalExceptionRes;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,6 +36,17 @@ public class ControllerValidation {
         Map<String, String> listErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             listErrors.put(error.getField(), error.getDefaultMessage());
+        });
+        GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(400, listErrors, LocalDate.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleConstraintValidationExceptions(ConstraintViolationException ex){
+        Map<String, String> listErrors = new HashMap<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            listErrors.put(violation.getPropertyPath().toString(), violation.getMessage());
         });
         GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(400, listErrors, LocalDate.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionRes);

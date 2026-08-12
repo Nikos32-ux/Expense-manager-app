@@ -6,7 +6,7 @@ public record UpdatePasswordReqDTO(
 
         @NotBlank(message = "{update.password.notBlank}"    )
         @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z@$!%*?&]{8,25}$",
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,25}$",
                 message = "{update.password.pattern}"
         )
         String password

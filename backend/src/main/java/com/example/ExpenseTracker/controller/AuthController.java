@@ -69,9 +69,9 @@ public class AuthController {
     }
 
     @GetMapping("/user-verify")
-    public ResponseEntity<LoginResDTO> verifyToken(Authentication auth) {
-        logger.info("Received request for user verification for email: {}", auth.getName());
-        UserPrincipal user = (UserPrincipal) auth.getPrincipal();
+    public ResponseEntity<LoginResDTO> verifyToken() {
+        UserPrincipal user = UserContextUtils.getAuthenticatedUser();
+        logger.info("Received request for user verification for email: {}", user.getDisplayName());
         LoginResDTO verifiedUserDTO = new LoginResDTO(
                 user.getId(),
                 user.getDisplayName(),

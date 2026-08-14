@@ -38,7 +38,9 @@ public class ExpenseController {
     public ResponseEntity<Page<ExpenseResDTO>> dashboardExpenses(){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
         Pageable fixedPageable = PageRequest.of(0,5,Sort.by("date").descending());
-        Page<ExpenseResDTO> topExpenses = expenseService.getDashExpenses(userId, fixedPageable);
+        Page<ExpenseResDTO> topExpenses =
+
+                expenseService.getDashExpenses(userId, fixedPageable);
 
         return ResponseEntity.ok().body(topExpenses);
     };
@@ -103,7 +105,7 @@ public class ExpenseController {
             @Valid @RequestBody ExpenseReqDTO expenseReqDTO,
             @RequestHeader("Idempotency-Key")
             @NotBlank(message = "{idempotency.key.required}")
-            @Size(min = 10, max = 50, message = "{idempotency.key.required}")
+            @Size(min = 10, max = 50, message = "{idempotency.key.invalid.size}")
             String idempotencyKey){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
         AddExpenseResDTO createExpenseStatus = expenseService.addExpense(expenseReqDTO, userId, idempotencyKey);
@@ -113,11 +115,11 @@ public class ExpenseController {
     }
 
     @PutMapping("update_expense/{expenseId}")
-   public ResponseEntity<ExpenseResDTO> updateExpense(@PathVariable Long expenseId, @RequestBody ExpenseReqDTO expenseReqDTO ){
+    public ResponseEntity<ExpenseResDTO> updateExpense(@PathVariable Long expenseId, @Valid @RequestBody ExpenseReqDTO expenseReqDTO ){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
         ExpenseResDTO updated = expenseService.updateExpense(expenseId, expenseReqDTO, userId);
        return ResponseEntity.ok(updated);
-   }
+    }
 
 
     @PutMapping("delete-expense/{expenseId}")

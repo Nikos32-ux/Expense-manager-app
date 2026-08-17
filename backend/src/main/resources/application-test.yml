@@ -1,0 +1,27 @@
+
+jwt:
+  secret: "dummySecretKeyForTestingPurposesOnly1234567890987654321"
+
+cloudinary:
+  cloud_name: "dummy-test-cloud"
+  api_key: "dummy-test-key"
+  api_secret: "dummy-test-secret"
+
+logging:
+  level:
+    root: WARN
+    com.example.ExpenseTracker: DEBUG
+    org.springframework: INFO
+    org.testcontainers: INFO
+    liquibase: INFO
+
+spring:
+  main:
+    application-startup: buffering
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
+
+

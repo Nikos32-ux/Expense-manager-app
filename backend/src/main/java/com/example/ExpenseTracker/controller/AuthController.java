@@ -3,13 +3,14 @@ import com.example.ExpenseTracker.dto.*;
 import com.example.ExpenseTracker.security.UserPrincipal;
 import com.example.ExpenseTracker.service.Auth.AuthService;
 import com.example.ExpenseTracker.util.UserContextUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +21,8 @@ import org.slf4j.Logger;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Auth management endpoints")
+
 public class AuthController {
 
     private final AuthService authService;
@@ -27,14 +30,33 @@ public class AuthController {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    
-   
-    @PostMapping("/register")
+
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new user using registration details client provides via multipart/form-data."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User successfully registered."),
+            @ApiResponse(responseCode = "400", description = "Validation error, invalid image file type, or upload error."),
+            @ApiResponse(responseCode = "409", description = "Email already exists or database constraint violation."),
+            @ApiResponse(responseCode = "413", description = "Uploaded file is too large (max: 5MB).")
+    })
+
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RegisterResDTO> userRegister(@Valid @ModelAttribute RegisterRequestDTO registerRequestDTO){
         RegisterResDTO registerResponse = authService.saveUser(registerRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
 
+    @Operation(
+            summary = "Login",
+            description = "Login providing login details via request payload."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User successfully logged in."),
+            @ApiResponse(responseCode = "400", description = "Validation error."),
+            @ApiResponse(responseCode = "401", description = "Invalid Credentials."),
+    })
     @PostMapping("/login")
     public ResponseEntity<LoginResDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
         WrapperLoginResDTO result = authService.userLogin(loginRequestDTO);
@@ -53,6 +75,11 @@ public class AuthController {
                 .body(result.user());
     }
 
+    @Operation(
+            summary = "Logout",
+            description = "Logout by clearing the authentication cookie."
+    )
+    @ApiResponse(responseCode = "200", description = "User successfully logged out.")
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         ResponseCookie logoutCookie = ResponseCookie.from("jwtToken", "")
@@ -68,6 +95,11 @@ public class AuthController {
                 .body("Successfully logged out");
     }
 
+    @Operation(
+            summary = "User verification.",
+            description = "Verifies user by validating jwt and returns profile details of authenticated user."
+    )
+    @ApiResponse(responseCode = "200", description = "Valid user, user details successfully retrieved.")
     @GetMapping("/user-verify")
     public ResponseEntity<LoginResDTO> verifyToken() {
         UserPrincipal user = UserContextUtils.getAuthenticatedUser();
@@ -81,6 +113,13 @@ public class AuthController {
         return ResponseEntity.ok().body(verifiedUserDTO);
     };
 
+    @Operation(
+            summary = "Update user account.",
+            description = "Updates user account details username and email."
+    )
+    @ApiResponse(responseCode = "200", description = "Account details successfully updated.")
+    @ApiResponse(responseCode = "400", description = "Validation error.")
+    @ApiResponse(responseCode = "404", description = "User was not found in the system.")
     @PutMapping("update-account-info")
     public ResponseEntity<UpdateAccountResDTO> changeUserInfo(@Valid @RequestBody UpdateAccountReqDTO updateAccount){
         Long userId = UserContextUtils.getAuthenticatedUser().getId();
@@ -88,6 +127,13 @@ public class AuthController {
         return ResponseEntity.ok().body(updatedAccount);
     }
 
+    @Operation(
+            summary = "Update user password.",
+            description = "Updates user account password."
+    )
+    @ApiResponse(responseCode = "200", description = "Account password successfully updated .")
+    @ApiResponse(responseCode = "400", description = "Validation error(password does not match requirements or is blank).")
+    @ApiResponse(responseCode = "404", description = "User was not found in the system.")
     @PutMapping("update-password")
     public ResponseEntity<UpdatePasswordResDTO> changeUserPassword(@Valid @RequestBody UpdatePasswordReqDTO updatePassword){
         logger.info("NEW password {}", updatePassword.password());

@@ -39,7 +39,7 @@ public record ExpenseReqDTO(
         @NotNull(message = "{expense.date.notnull}")
         @Schema(
                 description = "Date of expense creation",
-                example = "2026-8-8"
+                example = "2026-08-08"
         )
         LocalDate date,
 

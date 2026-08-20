@@ -6,5 +6,6 @@ public record LoginResDTO(
         Long id,
         String username,
         String email,
-        String imageProfile
+        String imageProfile,
+        String role
 ) {}

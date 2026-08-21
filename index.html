@@ -32,6 +32,7 @@
     <img src="https://img.shields.io/badge/AWS-EC2-orange?style=for-the-badge&logo=amazonaws" alt="AWS EC2">
 </div>
 
+    <h1 id="about">Expense Manager</h1>
     <h1>Expense Manager</h1>
     <h2>📌 What is this project?</h2>
     <p>
@@ -41,7 +42,7 @@
 <ul>
     <li>Users manage expenses in a web UI</li>
     <li>Backend handles authentication, storage, and business logic</li>
-    <li>System runs in multiple environments (dev / docker / production)</li>
+    <li>Runs in both <strong>local development</strong> and <strong>production</strong> environments</li>
     <li>Infrastructure is fully containerized with Docker</li>
 </ul>
 
@@ -58,11 +59,11 @@
         <li><a href="#about">About the Project</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#backend">Backend</a></li>
+        <li><a href="#testing">Testing</a></li>
         <li><a href="#frontend">Frontend</a></li>
         <li><a href="#env">Environment Configuration</a></li>
-        <li><a href="#deployment">Deployment & Infrastructure</a></li>
-        <li><a href="#quickstart">Quick Start with Docker</a></li>
-        <li><a href="#devsetup">Development Setup</a></li>
+        <li><a href="#deployment">Deployment, Infrastructure & CI-CD</a></li>
+        <li><a href="#running">Running the Application</a></li>
         <li><a href="#api">API Documentation</a></li>
     </ul>
 
@@ -90,14 +91,34 @@
         <li><strong>Caching</strong> using Spring Cache + Caffeine (in-memory)</li>
     </ul>
 
-    <h2 id="frontend">Frontend</h2>
-    <p>The frontend is built with Vite and served using Nginx as a reverse proxy.</p>
+    <h3 id="testing">Testing</h3>
+
+    <p>
+        Applied testing strategy across different backend layers :
+    </p>
+
+
     <ul>
-        <li><strong>Multi-stage Docker build</strong> for optimized image size</li>
-        <li>Uses <strong>Alpine-based Nginx image</strong></li>
-        <li><code>.dockerignore</code> file to reduce build context and speed up builds</li>
-        <li>Separate environment files (<code>.env.dev</code>, <code>.env.mobile</code>, <code>.env.prod</code>)</li>
-        <li>Configured <strong>Nginx as reverse proxy</strong> to forward requests to backend</li>
+        <li><strong>Controller Layer:</strong> Tested using <code>@WebMvcTest</code> and <code>MockMvc</code> (with <code>addFilters = false</code> to isolate Spring MVC controllers from security filters).</li>
+        <li><strong>Service Layer:</strong> Isolated unit testing using <strong>JUnit 5</strong> and <strong>Mockito</strong> for core business logic.</li>
+        <li><strong>Repository Layer:</strong> Database slice testing using <code>@DataJpaTest</code> powered by <strong>Testcontainers</strong> for real PostgreSQL container execution.</li>
+        <li><strong>Security & Filters:</strong> Integration tests verifying the custom <strong>JWT filter</strong> and <strong>Rate Limiting filter</strong> within the Spring Security filter chain.</li>
+    </ul>
+
+    <h2 id="frontend">Frontend</h2>
+
+    <p>
+        The frontend is a React application built with Vite that provides the
+        user interface for interacting with the expense management api.
+    </p>
+
+    <ul>
+        <li>Built with <strong>React</strong> and <strong>Vite</strong></li>
+        <li>Communicates with the Spring Boot REST API using HTTP requests</li>
+        <li>Handles JWT-based authentication on the client side</li>
+        <li>Uses <strong>React Router</strong> for client-side navigation</li>
+        <li>Uses <strong>TanStack Query</strong> for server-state management and API data fetching</li>
+        <li>Uses <strong>WebSocket</strong> communication to receive expense report generation results in real time</li>
     </ul>
 
     <h2 id="env">Environment Configuration</h2>
@@ -147,12 +168,35 @@ SPRING_RABBITMQ_PASSWORD=guest</code></pre>
     </table>
 
     <h2 id="deployment">Deployment & Infrastructure</h2>
-    <p>Currently running on <strong>AWS EC2 t3.micro</strong> (1GB RAM).</p>
-    <p><strong>Resource Optimizations:</strong></p>
+    <p>
+        The application is fully containerized using <strong>Docker</strong> and
+        <strong>Docker Compose</strong>. The production environment is deployed
+        on <strong>AWS EC2</strong>, with <strong>GitHub Actions</strong> used
+        for continuous integration and deployment.
+    </p>
+
+    <h3>Docker</h3>
+
     <ul>
-        <li>Added swap space</li>
-        <li>Set JVM flags: <code>-Xmx512m -Xms256m</code></li>
-        <li>Using in-memory cache to reduce load</li>
+        <li>Backend, frontend, PostgreSQL, and RabbitMQ run as Docker services</li>
+        <li><strong>Docker Compose</strong> manages the application stack</li>
+        <li>Frontend uses a <strong>multi-stage Docker build</strong></li>
+        <li>Frontend is served using an <strong>Alpine-based Nginx</strong> image</li>
+    </ul>
+
+    <h3>CI/CD</h3>
+
+    <p>
+        Continuous integration and deployment are handled using
+        <strong>GitHub Actions</strong>.
+    </p>
+
+    <ul>
+        <li>Automated backend tests are executed as part of the CI pipeline of backend job runner</li>
+        <li>The backend application is built using JDK 21</li>
+        <li>Docker images are built and pushed to <strong>Docker Hub</strong></li>
+        <li>GitHub Action runners authenticate with AWS using <strong>OIDC</strong></li>
+        <li>Production deployment is triggered through <strong>AWS Systems Manager (SSM)</strong></li>
     </ul>
 
    <h2 id="running">Running the Application</h2>
@@ -206,9 +250,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret</code></pre>
 
     <h3>Option 3: Production (AWS EC2)</h3>
 
-<p>
-Same Docker setup, deployed on server.
-</p>
+<p> Same Docker setup, deployed on server.</p>
 
 <pre><code>docker compose up -d --build</code></pre>
 
@@ -218,8 +260,40 @@ Same Docker setup, deployed on server.
     <li>same Spring profile as Docker mode</li>
 </ul>
 
+    <h2 id="api">API Documentation</h2>
+
+    <p>
+        The backend provides API documentation using
+        <strong>Swagger UI</strong> and <strong>OpenAPI</strong>.
+    </p>
+
+    <p>
+        When running the application locally, Swagger UI is available at:
+    </p>
+
+    <pre><code>http://localhost:8080/swagger-ui/index.html</code></pre>
+
+    <p>
+        Swagger UI allows you to:
+    </p>
+
+    <ul>
+        <li>View available API endpoints</li>
+        <li>Inspect request parameters, request bodies, and responses</li>
+        <li>Register a user through the authentication endpoint</li>
+        <li>Log in to obtain a JWT</li>
+        <li>Use the JWT to authenticate requests to protected endpoints</li>
+        <li>Send requests directly from Swagger UI using <strong>Try it out</strong></li>
+    </ul>
+
+    <p>
+        To test protected endpoints, first register a user and log in to obtain
+        a JWT.
+    </p>
+
+    <hr>
     <hr>n 2
-    <p><strong>Made with ❤️ by a developer who is constantly learning</strong></p>
+
 
 </body>
 </html>

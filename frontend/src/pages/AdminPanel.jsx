@@ -4,7 +4,7 @@ import { Link, Outlet, NavLink, Navigate, useOutletContext } from 'react-router-
 
 function AdminPanel() {
   const { user, isLoading } = useOutletContext();
-  if(user.role !== "ROLE_ADMIN") return <Navigate to="/dashboard" replace/>  
+  if (user.role !== "ROLE_ADMIN") return <Navigate to="/dashboard" replace />
 
 
   return (
@@ -57,13 +57,15 @@ function AdminPanel() {
           </div>
         </div>
       </aside>
+
       <Outlet />
+
       <nav className="fixed lg:hidden lg:z-0 bottom-0 left-0 right-0 h-[70px] bg-slate-800 border-t border-slate-700 flex items-center justify-around z-60">
-        <NavLink to="" end className={({isActive}) => `flex flex-col items-center justify-center flex-1 h-full text-white font-bold text-xs gap-1 ${isActive ? "bg-blue-600 text-white rounded-xl" : "text-slate-400 hover:text-white"}`}>
+        <NavLink to="" end className={({ isActive }) => `flex flex-col items-center justify-center flex-1 h-full text-white font-bold text-xs gap-1 ${isActive ? "bg-blue-600 text-white rounded-xl" : "text-slate-400 hover:text-white"}`}>
           <span className="text-base">🏠</span>
           <span>Overview</span>
         </NavLink>
-        <NavLink to="users" end className={({isActive}) => `flex flex-col items-center justify-center flex-1 h-full text-white font-bold text-xs gap-1 ${isActive ? "bg-blue-600 text-white rounded-xl" : "text-slate-400 hover:text-white"}`}>
+        <NavLink to="users" end className={({ isActive }) => `flex flex-col items-center justify-center flex-1 h-full text-white font-bold text-xs gap-1 ${isActive ? "bg-blue-600 text-white rounded-xl" : "text-slate-400 hover:text-white"}`}>
           <span className="text-base">👥</span>
           <span>Users</span>
         </NavLink>

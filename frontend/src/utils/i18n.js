@@ -76,7 +76,8 @@ const resources = {
       "dashboard-empty-subtitle" : "No transactions recorded yet. Use the buttons above to add your first expense or income",
       "no-more-items":"No more expenses",
       "select-payment-method": "Select payment method",
-      "select-category": "Select category"
+      "select-category": "Select category",
+      "no-more-logs": "End of users actions logs activity"
     }
   },
   el: {

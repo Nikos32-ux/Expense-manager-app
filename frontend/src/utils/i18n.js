@@ -77,7 +77,8 @@ const resources = {
       "no-more-items":"No more expenses",
       "select-payment-method": "Select payment method",
       "select-category": "Select category",
-      "no-more-logs": "End of users actions logs activity"
+      "no-more-logs": "End of users actions logs activity",
+      "no-more-users": "End of users"
     }
   },
   el: {

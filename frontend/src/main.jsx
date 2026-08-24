@@ -30,6 +30,9 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import PrivateRoutes from './layouts/PrivateRoutes.jsx';
 import PublicRoutes from './layouts/PublicRoutes.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import AdminPanel from './pages/AdminPanel.jsx';
+import AdminOverview from './components/admin/AdminOverview.jsx';
+import AdminUsers from './components/admin/AdminUsers.jsx';
 
 
 const router = createBrowserRouter([
@@ -77,6 +80,14 @@ const router = createBrowserRouter([
             element: <Transactions />,
             children: [
               { path: ":id", element: <ExpenseDetail /> }
+            ]
+          },
+          {
+            path: "admin",
+            element: <AdminPanel />,
+            children: [
+              { index:true , element: <AdminOverview /> },
+              { path: "users", element: <AdminUsers /> }
             ]
           }
         ]

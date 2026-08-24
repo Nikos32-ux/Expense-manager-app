@@ -108,7 +108,8 @@ public class AuthController {
                 user.getId(),
                 user.getDisplayName(),
                 user.getEmail(),
-                user.getImageProfile()
+                user.getImageProfile(),
+                user.getRole()
         );
         return ResponseEntity.ok().body(verifiedUserDTO);
     };

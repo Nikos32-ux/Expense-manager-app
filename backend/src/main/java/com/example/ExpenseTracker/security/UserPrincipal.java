@@ -37,6 +37,12 @@ public class UserPrincipal implements UserDetails {
     public String getEmail(){return user.getEmail();}
     public String getImageProfile(){return user.getImageProfile();}
     public String getDisplayName() {return user.getUsername();}
+    public String getRole(){
+        return user.getRoles().stream()
+                .findFirst()
+                .map(role -> role.getRoleType().toString())
+                .orElse("ROLE_USER");
+    }
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }

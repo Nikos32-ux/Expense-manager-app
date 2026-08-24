@@ -97,7 +97,8 @@ public class AuthServiceImpl implements AuthService {
                 user.getId(),
                 user.getDisplayName(),
                 user.getEmail(),
-                user.getImageProfile()
+                user.getImageProfile(),
+                user.getRole()
         );
 
         auditPublisher.publishEvent(

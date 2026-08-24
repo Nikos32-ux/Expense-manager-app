@@ -204,7 +204,8 @@ public class AuthControllerTest {
                     1L,
                     "TestDev!",
                     "test123@gmail.com",
-                    "file-123"
+                    "file-123",
+                    "ROLE_USER"
             );
 
 

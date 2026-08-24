@@ -1,5 +1,4 @@
 package com.example.ExpenseTracker.events.audit;
-
 import com.example.ExpenseTracker.model.UserActionsCategory;
 
 import java.time.LocalDateTime;

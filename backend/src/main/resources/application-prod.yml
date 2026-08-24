@@ -39,7 +39,7 @@ cloudinary:
 logging:
   level:
     root: INFO
-    com.example.ExpenseTracker: WARN
+    com.example.ExpenseTracker: INFO
 
 management:
   endpoints:

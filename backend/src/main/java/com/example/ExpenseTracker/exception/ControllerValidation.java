@@ -54,6 +54,7 @@ public class ControllerValidation {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex){
+        log.warn("Registration attempt failed: Email already exists -> {}", ex.getMessage());
         GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(409, Map.of("email", ex.getMessage()), LocalDate.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
     }
@@ -101,18 +102,20 @@ public class ControllerValidation {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleUserNotFoundException(UserNotFoundException ex){
+        log.warn("User not found: {}", ex.getMessage());
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(404,"User not found", LocalDate.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionRes);
     }
 
     @ExceptionHandler(CloudinaryException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleCloudinaryUpload(CloudinaryException ex){
-        log.error("Cloudinary upload failed", ex);
+        log.error("Cloudinary upload failed: {}", ex.getMessage());
         return buildErrorList("imageProfile", ex.getMessage()); 
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleInvalidFileType(InvalidFileTypeException ex){
+        log.warn("Invalid file upload attempt: {}", ex.getMessage());
         return buildErrorList("imageProfile", ex.getMessage());
     }
 

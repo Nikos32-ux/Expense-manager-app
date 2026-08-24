@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,7 @@ import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j  
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -43,7 +45,6 @@ public class AuthServiceImpl implements AuthService {
     private final TikaService tikaService;
     private final LoadingCache<String, User> cache;
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Override
     @Transactional
@@ -51,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
         tikaService.validateFile(registerRequestDTO.imageProfile());
 
        if(userRepository.existsByEmail(registerRequestDTO.email())){
+           log.warn("Registration failed: Email already exists");
            throw new EmailAlreadyExistsException(registerRequestDTO.email());
        }
 
@@ -63,13 +65,17 @@ public class AuthServiceImpl implements AuthService {
 
         String password = passwordEncoder.encode(registerRequestDTO.password());
         Roles role = rolesRepository.findByRoleType(RoleCategory.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Role was not found"));
+                .orElseThrow(() ->{
+                    log.error("CRITICAL: Default ROLE_USER was not found in database during registration!");
+                    return new RuntimeException("Role was not found");
+                });
 
         user.setPassword(password);
         user.getRoles().add(role);
         user.setImageProfile(file_path);
 
         User savedUser = userRepository.save(user);
+        log.info("New user registered successfully: id={}", savedUser.getId());
 
         auditPublisher.publishEvent(
                 savedUser.getId(),
@@ -92,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(token);
         UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
         String jwt = jwtUtils.generateToken(user);
-
+        log.info("User logged in successfully: id={}", user.getId());
         LoginResDTO loginResDTO = new LoginResDTO(
                 user.getId(),
                 user.getDisplayName(),
@@ -133,6 +139,8 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         cache.invalidate(oldEmail);
+        log.info("Account info updated successfully for user id={}", user.getId());
+
 
         return new UpdateAccountResDTO(
                 user.getUsername(),
@@ -151,6 +159,7 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
         cache.invalidate(user.getEmail());
+        log.info(" Password successfully changed for user id={}", userId);
         return new UpdatePasswordResDTO("success","Updated password successfully");
     }
 }

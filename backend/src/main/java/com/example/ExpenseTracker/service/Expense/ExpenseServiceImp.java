@@ -46,6 +46,7 @@ public class ExpenseServiceImp implements ExpenseService {
 
     public void checkOwnership(Long loggedInUserId, Long expenseOwnerId) {
         if (!loggedInUserId.equals(expenseOwnerId)) {
+            log.warn("SECURITY_VIOLATION: User id={} attempted to access resource belonging to user id={}", loggedInUserId, expenseOwnerId);
             throw new ResourceNotFoundException("Resource not found");
         }
     }
@@ -102,23 +103,30 @@ public class ExpenseServiceImp implements ExpenseService {
             @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String idempotencyKey) {
-         log.info("ADD_EXPENSE_REQUEST_RECEIVED userId={}, key={}", userId, idempotencyKey);
+         log.debug("ADD_EXPENSE_REQUEST_RECEIVED userId={}, key={}", userId, idempotencyKey);
 
         Optional<IdempotentRecords> record = idempotencyRepository.findByIdempotencyKey(idempotencyKey);
 
         if(record.isPresent()){
-            log.info("RECORD_EXISTS_RETURN_STATUS userId={}, key={}", userId, idempotencyKey);
+            log.debug(
+                    "Returning existing idempotency result: userId={}, idempotencyKey={}",
+                    userId,
+                    idempotencyKey
+            );
             return new AddExpenseResDTO(record.get().getStatus());
         }
 
         int recordAdded = idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS");
 
         if(recordAdded == 0){
-            log.info("DUPLICATE_REQUEST_BLOCKED_BY_CONFLICT userId={}, key={}", userId, idempotencyKey);
+            log.debug(
+                    "Concurrent duplicate expense request detected: userId={}, idempotencyKey={}",
+                    userId,
+                    idempotencyKey
+            );
             return new AddExpenseResDTO("IN_PROGRESS");
         }
 
-        log.info("IDEMPOTENCY_WINNER_CONTINUING_BUSINESS_LOGIC userId={}, key={}", userId, idempotencyKey);
         ExpenseCategory category = expenseCatRepository.findById(expenseReqDTO.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException(expenseReqDTO.categoryId()));
 
@@ -131,6 +139,12 @@ public class ExpenseServiceImp implements ExpenseService {
         expense.setCategory(category);
 
         expenseRepository.save(expense);
+        log.info(
+                "Expense created successfully: expenseId={}, userId={}",
+                expense.getId(),
+                userId
+        );
+
         idempotencyRepository.markRecordCompleted(idempotencyKey, "COMPLETED");
         reportRepository.markReportStale(userId);
 
@@ -160,6 +174,7 @@ public class ExpenseServiceImp implements ExpenseService {
         expense.setCategory(category);
 
         Expense saved = expenseRepository.save(expense);
+        log.info("Expense updated successfully: id={}, userId={}", saved.getId(), userId);
 
         reportRepository.markReportStale(userId);
         auditPublisher.publishEvent(expense.getUser().getId(), UserActionsCategory.USER_UPDATED_EXPENSE, "USER", now());
@@ -180,6 +195,8 @@ public class ExpenseServiceImp implements ExpenseService {
         Expense expense = getExpenseEntity(id, userId);
 
         expenseRepository.deleteById(expense.getId());
+        log.info("Expense deleted successfully: id={}, userId={}", expense.getId(), userId);
+
         reportRepository.markReportStale(userId);
         auditPublisher.publishEvent(
                 expense.getUser().getId(),

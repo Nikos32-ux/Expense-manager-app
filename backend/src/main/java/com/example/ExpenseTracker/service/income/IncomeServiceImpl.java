@@ -49,21 +49,39 @@ public class IncomeServiceImpl implements IncomeService {
        Long userId = user.getId();
        Optional<IdempotentRecords> record = idempotencyRepository.findByIdempotencyKey(key);
        if(record.isPresent()){
-           log.info("RECORD_EXISTS_RETURN_STATUS userId={}, key={}", userId, key);
+           log.debug(
+                   "Returning existing idempotency result: userId={}, idempotencyKey={}",
+                   userId,
+                   key
+           );
            return new IncomeResDTO(record.get().getStatus());
        }
 
         int incomeRecordAdded = idempotencyRepository.createRecord(key, "IN_PROGRESS");
         if(incomeRecordAdded == 0){
-            log.info("DUPLICATE_REQUEST_BLOCKED_BY_CONFLICT userId={}, key={}", userId, key);
+            log.debug(
+                    "Concurrent duplicate income request detected: userId={}, idempotencyKey={}",
+                    userId,
+                    key
+            );
             return new IncomeResDTO("IN_PROGRESS");
         }
-        log.info("IDEMPOTENCY_WINNER_CONTINUING_BUSINESS_LOGIC userId={}, key={}", userId, key);
+        log.debug(
+                "Idempotency check passed, continuing income creation: userId={}, idempotencyKey={}",
+                userId,
+                key
+        );
+
         User userRef = userRepository.getReferenceById(userId);
         Income income = IncomeMapper.toEntity(addIncomeReqDTO);
         income.setUser(userRef);
 
         incomeRepository.save(income);
+        log.debug(
+                "Idempotency check passed, continuing income creation: userId={}, idempotencyKey={}",
+                userId,
+                key
+        );
         idempotencyRepository.markRecordCompleted(key, "COMPLETED");
 
        return new IncomeResDTO("COMPLETED");

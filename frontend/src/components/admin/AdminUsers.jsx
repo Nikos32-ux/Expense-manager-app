@@ -43,8 +43,6 @@ const AdminUsers = () => {
 
 
   const renderUsers = () => {
-    console.log("renderusers triggered", adminUsersData?.pages);
-    
     return (
       adminUsersData?.pages?.flatMap(page => page.content).map((userDataEntry, idx) => {
         return (
@@ -67,7 +65,6 @@ const AdminUsers = () => {
   }
 
   const renderUser = () => {
-    console.log("renderUser triggered");
     return (
       <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -97,9 +94,7 @@ const AdminUsers = () => {
         <div className="searchInput flex items-center justify-between gap-2 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
           <input
             onChange={(e) => {
-              if(e.target.value.length === 0) {
-                setSearchInput("");
-              }
+              if(e.target.value.length === 0) setSearchInput("");
               setDraftInput(e.target.value)
             }}
             onKeyDown={(e) => {

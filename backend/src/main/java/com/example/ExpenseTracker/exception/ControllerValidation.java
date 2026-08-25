@@ -54,7 +54,10 @@ public class ControllerValidation {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex){
-        log.warn("Registration attempt failed: Email already exists -> {}", ex.getMessage());
+        log.atWarn()
+                .setMessage("Registration attempt failed: Email already exists")
+                .addKeyValue("eventType", "DUPLICATE_EMAIL")
+                .log();
         GlobalExceptionRes<Map<String, String>> exceptionRes = new GlobalExceptionRes<>(409, Map.of("email", ex.getMessage()), LocalDate.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
     }
@@ -68,7 +71,10 @@ public class ControllerValidation {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleBadCredentials(BadCredentialsException ex){
-        log.warn("Failed login attempt");
+        log.atWarn()
+                .setMessage("Authentication failed")
+                .addKeyValue("eventType", "AUTHENTICATION_FAILED")
+                .log();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(401,"Invalid credentials", LocalDate.now());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionRes);
     }
@@ -102,40 +108,61 @@ public class ControllerValidation {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleUserNotFoundException(UserNotFoundException ex){
-        log.warn("User not found: {}", ex.getMessage());
+        log.atWarn()
+                .setMessage("User not found")
+                .addKeyValue("eventType", "USER_NOT_FOUND")
+                .log();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(404,"User not found", LocalDate.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionRes);
     }
 
     @ExceptionHandler(CloudinaryException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleCloudinaryUpload(CloudinaryException ex){
-        log.error("Cloudinary upload failed: {}", ex.getMessage());
+        log.atError()
+                .setMessage("Cloudinary upload failed")
+                .addKeyValue("eventType", "CLOUDINARY_UPLOAD_FAILED")
+                .setCause(ex)
+                .log();
         return buildErrorList("imageProfile", ex.getMessage()); 
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<GlobalExceptionRes<Map<String, String>>> handleInvalidFileType(InvalidFileTypeException ex){
-        log.warn("Invalid file upload attempt: {}", ex.getMessage());
+        log.atWarn()
+                .setMessage("Invalid file upload attempt")
+                .addKeyValue("eventType", "INVALID_FILE_TYPE")
+                .log();
         return buildErrorList("imageProfile", ex.getMessage());
     }
 
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleDatabaseExceptions(DataAccessException ex){
-        log.error("Database error occurred", ex);
+        log.atError()
+                .setMessage("Database error occurred")
+                .addKeyValue("eventType", "DATABASE_ERROR")
+                .setCause(ex)
+                .log();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(500,"Something went wrong, internal server error", LocalDate.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionRes);
     }
 
     @ExceptionHandler(FileReadException.class)
     public ResponseEntity<GlobalExceptionRes<String>> handleFileReadException(FileReadException ex){
-        log.error("File read error", ex);
+        log.atError()
+                .setMessage("Failed to read uploaded file")
+                .addKeyValue("eventType", "FILE_READ_ERROR")
+                .setCause(ex)
+                .log();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(500, ex.getMessage(), LocalDate.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionRes);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<GlobalExceptionRes<String>> dbConstraintViolationException(DataIntegrityViolationException ex){
-        log.warn("DB constraint violation: {}", ex.getMessage());
+        log.atWarn()
+                .setMessage("Database constraint violation")
+                .addKeyValue("eventType", "DB_CONSTRAINT_VIOLATION")
+                .log();
         GlobalExceptionRes<String> exceptionRes = new GlobalExceptionRes<>(409,"Constraint violation occurred", LocalDate.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionRes);
     }

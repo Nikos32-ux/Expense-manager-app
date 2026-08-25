@@ -25,7 +25,7 @@ public class JwtFilterService {
         if(email != null && SecurityContextHolder.getContext().getAuthentication() == null){
            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
            if(jwtUtils.validateToken(email, userDetails)){
-               logger.info("Token validated successfully for user: {}", email);
+
                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                        userDetails,
                        null,
@@ -33,7 +33,10 @@ public class JwtFilterService {
                );
                SecurityContextHolder.getContext().setAuthentication(token);
            }else{
-               logger.info("Token validated failed for user: {}", email);
+               logger.atWarn()
+                       .setMessage("JWT authentication failed")
+                       .addKeyValue("eventType", "JWT_AUTHENTICATION_FAILED")
+                       .log();
            }
         }
     }

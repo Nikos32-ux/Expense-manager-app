@@ -49,39 +49,48 @@ public class IncomeServiceImpl implements IncomeService {
        Long userId = user.getId();
        Optional<IdempotentRecords> record = idempotencyRepository.findByIdempotencyKey(key);
        if(record.isPresent()){
-           log.debug(
-                   "Returning existing idempotency result: userId={}, idempotencyKey={}",
-                   userId,
-                   key
-           );
+
+           log.atDebug()
+                   .setMessage("Returning existing idempotency result")
+                   .addKeyValue("userId", user.getId())
+                   .addKeyValue("idempotencyKey", key)
+                   .log();
            return new IncomeResDTO(record.get().getStatus());
        }
 
         int incomeRecordAdded = idempotencyRepository.createRecord(key, "IN_PROGRESS");
         if(incomeRecordAdded == 0){
-            log.debug(
-                    "Concurrent duplicate income request detected: userId={}, idempotencyKey={}",
-                    userId,
-                    key
-            );
+
+            log.atDebug()
+                    .setMessage("Concurrent duplicate income request detected")
+                    .addKeyValue("userId", user.getId())
+                    .addKeyValue("idempotencyKey", key)
+                    .log();
+
             return new IncomeResDTO("IN_PROGRESS");
         }
-        log.debug(
-                "Idempotency check passed, continuing income creation: userId={}, idempotencyKey={}",
-                userId,
-                key
-        );
+
+        log.atDebug()
+                .setMessage("Idempotency check passed, continuing income creation")
+                .addKeyValue("userId", user.getId())
+                .addKeyValue("idempotencyKey", key)
+                .log();
+
 
         User userRef = userRepository.getReferenceById(userId);
         Income income = IncomeMapper.toEntity(addIncomeReqDTO);
         income.setUser(userRef);
 
-        incomeRepository.save(income);
-        log.debug(
-                "Idempotency check passed, continuing income creation: userId={}, idempotencyKey={}",
-                userId,
-                key
-        );
+       Income savedIncome = incomeRepository.save(income);
+
+        log.atInfo()
+                .setMessage("Income created successfully")
+                .addKeyValue("userId", user.getId())
+                .addKeyValue("incomeId", savedIncome.getId())
+                .addKeyValue("eventType", "INCOME_GENERATED")
+                .log();
+
+
         idempotencyRepository.markRecordCompleted(key, "COMPLETED");
 
        return new IncomeResDTO("COMPLETED");

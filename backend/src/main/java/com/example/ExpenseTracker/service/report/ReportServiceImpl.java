@@ -55,7 +55,10 @@ public class ReportServiceImpl implements ReportService {
 
             if(reportStatus.isPresent()){
                 if(reportStatus.get().getStatus().equals("DONE")){
-                    log.debug("Report already finished for user {}. Skipping duplicate.", userId);
+                    log.atDebug()
+                            .setMessage("Report already finished. Skipping duplicate")
+                            .addKeyValue("userId", userId)
+                            .log();
                     return;
                 }
             }
@@ -70,7 +73,11 @@ public class ReportServiceImpl implements ReportService {
             try{
                 Files.deleteIfExists(file);
             }catch(IOException e){
-                log.warn("Failed to delete temp file {}", file);
+                log.atWarn()
+                        .setMessage("Failed to delete temp file")
+                        .addKeyValue("file", file.toString())
+                        .setCause(e)
+                        .log();
             }
 
         }
@@ -85,10 +92,6 @@ public class ReportServiceImpl implements ReportService {
             boolean isDone = existingReportData.get().getStatus().equals("DONE");
 
             if(isBusy) {
-                log.debug(
-                        "Report is currently processing: userId={}",
-                        userId
-                );
                 return new ReportActionResponse(
                         "IN_PROGRESS",
                        null,
@@ -97,20 +100,12 @@ public class ReportServiceImpl implements ReportService {
             }
 
             if(isDone && !existingReportData.get().getIsChanged()){
-                log.debug(
-                        "Report is fresh: userId={}",
-                        userId
-                );
                 return new ReportActionResponse(
                         "FRESH",
                         existingReportData.get().getFilePath(),
                         LocalDateTime.now()
                 );
             }else if(isDone && existingReportData.get().getIsChanged()){
-                log.debug(
-                        "Report is stale: userId={}",
-                        userId
-                );
                 return new ReportActionResponse(
                         "STALE",
                         existingReportData.get().getFilePath(),
@@ -127,10 +122,12 @@ public class ReportServiceImpl implements ReportService {
         if(existingReportData == null){
             int insertSucceeded = reportRepository.insertReport(userId);
             if(insertSucceeded == 1) {
-                log.info(
-                        "Report creation started: userId={}",
-                        userId
-                );
+
+                log.atInfo()
+                        .setMessage("Report creation started")
+                        .addKeyValue("userId", userId)
+                        .addKeyValue("eventType", "REPORT_CREATION_STARTED")
+                        .log();
                 reportMessageProducer.sendReportTask(userId, email);
             }
         }
@@ -138,10 +135,11 @@ public class ReportServiceImpl implements ReportService {
         if(existingReportData != null && existingReportData.status().equals("STALE")){
             int updateSucceeded = reportRepository.setReportStatus(userId);
             if(updateSucceeded == 1){
-                log.info(
-                        "Report update started: userId={}",
-                        userId
-                );
+                log.atInfo()
+                        .setMessage("Report update started")
+                        .addKeyValue("userId", userId)
+                        .addKeyValue("eventType", "REPORT_UPDATE_STARTED")
+                        .log();
                 reportMessageProducer.sendReportTask(userId, email);
             }
         }
@@ -158,11 +156,13 @@ public class ReportServiceImpl implements ReportService {
 
             reportRepository.save(report);
 
-        log.info(
-                "Report generated successfully: userId={}, reportId={}",
-                userRef.getId(),
-                report.getId()
-        );
+
+        log.atInfo()
+                .setMessage("Report generated successfully")
+                .addKeyValue("userId", userRef.getId())
+                .addKeyValue("reportId", report.getId())
+                .addKeyValue("eventType", "REPORT_GENERATED")
+                .log();
 
             Notification notification = new Notification();
 
@@ -221,8 +221,12 @@ public class ReportServiceImpl implements ReportService {
                 return Files.move(tempFile, finalFile, StandardCopyOption.ATOMIC_MOVE);
             }
         }catch (IOException e){
-            log.error("CRITICAL: Failed to create CSV report file for userId={}", userId, e);
-            throw new RuntimeException("Failed to generate report file", e);        }
+            log.atError()
+                    .setMessage("Failed to create CSV report file")
+                    .addKeyValue("userId", userId)
+                    .setCause(e)
+                    .log();
+            throw new RuntimeException("Failed to generate report file", e);}
     }
 
 }

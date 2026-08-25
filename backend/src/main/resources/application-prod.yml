@@ -37,9 +37,13 @@ cloudinary:
   api_secret: ${CLOUDINARY_SECRET}
 
 logging:
+  structured:
+    format:
+      console: logstash
   level:
     root: INFO
     com.example.ExpenseTracker: INFO
+
 
 management:
   endpoints:

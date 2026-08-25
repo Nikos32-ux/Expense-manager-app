@@ -11,10 +11,6 @@
       hibernate:
         ddl-auto: none
 
-  logging:
-    structured:
-      format:
-        console: logstash
 
     liquibase:
       enabled: true

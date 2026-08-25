@@ -18,10 +18,7 @@ import com.example.ExpenseTracker.service.audit.AuditPublisher;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,7 +49,6 @@ public class AuthServiceImpl implements AuthService {
         tikaService.validateFile(registerRequestDTO.imageProfile());
 
        if(userRepository.existsByEmail(registerRequestDTO.email())){
-           log.warn("Registration failed: Email already exists");
            throw new EmailAlreadyExistsException(registerRequestDTO.email());
        }
 
@@ -66,7 +62,10 @@ public class AuthServiceImpl implements AuthService {
         String password = passwordEncoder.encode(registerRequestDTO.password());
         Roles role = rolesRepository.findByRoleType(RoleCategory.ROLE_USER)
                 .orElseThrow(() ->{
-                    log.error("CRITICAL: Default ROLE_USER was not found in database during registration!");
+                    log.atError()
+                            .setMessage("Default ROLE_USER was not found in database during registration")
+                            .addKeyValue("eventType", "DEFAULT_ROLE_MISSING")
+                            .log();
                     return new RuntimeException("Role was not found");
                 });
 
@@ -75,7 +74,11 @@ public class AuthServiceImpl implements AuthService {
         user.setImageProfile(file_path);
 
         User savedUser = userRepository.save(user);
-        log.info("New user registered successfully: id={}", savedUser.getId());
+        log.atInfo()
+                .setMessage("New user registered successfully")
+                .addKeyValue("userId", savedUser.getId())
+                .addKeyValue("eventType", "USER_REGISTRATION_SUCCESS")
+                .log();
 
         auditPublisher.publishEvent(
                 savedUser.getId(),
@@ -98,7 +101,13 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(token);
         UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
         String jwt = jwtUtils.generateToken(user);
-        log.info("User logged in successfully: id={}", user.getId());
+
+        log.atInfo()
+                .setMessage("User logged in successfully")
+                .addKeyValue("userId", user.getId())
+                .addKeyValue("eventType", "USER_LOGIN_SUCCESS")
+                .log();
+
         LoginResDTO loginResDTO = new LoginResDTO(
                 user.getId(),
                 user.getDisplayName(),
@@ -139,8 +148,11 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         cache.invalidate(oldEmail);
-        log.info("Account info updated successfully for user id={}", user.getId());
-
+        log.atInfo()
+                .setMessage("Account info updated successfully")
+                .addKeyValue("userId", user.getId())
+                .addKeyValue("eventType", "ACCOUNT_UPDATED")
+                .log();
 
         return new UpdateAccountResDTO(
                 user.getUsername(),
@@ -159,7 +171,11 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
         cache.invalidate(user.getEmail());
-        log.info(" Password successfully changed for user id={}", userId);
+        log.atInfo()
+                .setMessage("Password successfully changed for user")
+                .addKeyValue("userId", user.getId())
+                .addKeyValue("eventType", "PASSWORD_UPDATED")
+                .log();
         return new UpdatePasswordResDTO("success","Updated password successfully");
     }
 }

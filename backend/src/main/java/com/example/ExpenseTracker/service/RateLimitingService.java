@@ -60,7 +60,6 @@ public class RateLimitingService {
 
     private Bucket createBucket(String key, String path){
         Rule type = findRateLimitPolicy(path);
-        log.debug("Creating new rate limit bucket for path: {}", path);
         return Bucket.builder()
                 .addLimit(limit ->
                         limit.capacity(type.getCapacity())

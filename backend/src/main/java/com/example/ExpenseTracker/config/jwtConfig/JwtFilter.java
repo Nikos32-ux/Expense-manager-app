@@ -45,12 +45,21 @@ public class JwtFilter extends OncePerRequestFilter {
            jwtFilterService.validateTokenAndUser(jwt);
        }
        catch(JwtException | UsernameNotFoundException ex){
-           log.warn("JWT authentication failed for URI {}: ", request.getRequestURI());
+           log.atWarn()
+                   .setMessage("JWT authentication failed")
+                   .addKeyValue("eventType", "JWT_AUTHENTICATION_FAILED")
+                   .addKeyValue("uri", request.getRequestURI())
+                   .log();
            jwtEntryPoint.commence(request, response, new BadCredentialsException("Invalid credentials"));
            return;
        }
        catch (Exception ex){
-           log.error("Unexpected error during JWT validation for URI {}", request.getRequestURI());
+           log.atError()
+                   .setMessage("Unexpected error during JWT validation")
+                   .addKeyValue("eventType", "AUTHENTICATION_ERROR")
+                   .addKeyValue("uri", request.getRequestURI())
+                   .setCause(ex)
+                   .log();
            jwtEntryPoint.commence(request, response, new InternalAuthenticationServiceException("Internal server error during authentication"));
            return;
        }

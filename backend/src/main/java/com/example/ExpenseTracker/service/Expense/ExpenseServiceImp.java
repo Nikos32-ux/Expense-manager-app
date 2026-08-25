@@ -46,6 +46,12 @@ public class ExpenseServiceImp implements ExpenseService {
 
     public void checkOwnership(Long loggedInUserId, Long expenseOwnerId) {
         if (!loggedInUserId.equals(expenseOwnerId)) {
+            log.atWarn()
+                    .setMessage(" User attempted to access resource belonging to user")
+                    .addKeyValue("loggedInUserId", loggedInUserId)
+                    .addKeyValue("expenseOwnerId", expenseOwnerId)
+                    .addKeyValue("eventType", "SECURITY_VIOLATION")
+                    .log();
             throw new ResourceNotFoundException("Resource not found");
         }
     }
@@ -102,23 +108,30 @@ public class ExpenseServiceImp implements ExpenseService {
             @CacheEvict(value = "category-total-amount", allEntries = true)
     })
     public AddExpenseResDTO addExpense(ExpenseReqDTO expenseReqDTO, Long userId, String idempotencyKey) {
-         log.info("ADD_EXPENSE_REQUEST_RECEIVED userId={}, key={}", userId, idempotencyKey);
+        log.atDebug()
+                .setMessage("Add Expense received request")
+                .addKeyValue("userId", userId)
+                .addKeyValue("idempotencyKey", idempotencyKey)
+                .log();
 
         Optional<IdempotentRecords> record = idempotencyRepository.findByIdempotencyKey(idempotencyKey);
 
         if(record.isPresent()){
-            log.info("RECORD_EXISTS_RETURN_STATUS userId={}, key={}", userId, idempotencyKey);
+
+            log.atDebug()
+                    .setMessage("Returning existing idempotency result")
+                    .addKeyValue("userId", userId)
+                    .addKeyValue("idempotencyKey", idempotencyKey)
+                    .log();
             return new AddExpenseResDTO(record.get().getStatus());
         }
 
         int recordAdded = idempotencyRepository.createRecord(idempotencyKey, "IN_PROGRESS");
 
         if(recordAdded == 0){
-            log.info("DUPLICATE_REQUEST_BLOCKED_BY_CONFLICT userId={}, key={}", userId, idempotencyKey);
             return new AddExpenseResDTO("IN_PROGRESS");
         }
 
-        log.info("IDEMPOTENCY_WINNER_CONTINUING_BUSINESS_LOGIC userId={}, key={}", userId, idempotencyKey);
         ExpenseCategory category = expenseCatRepository.findById(expenseReqDTO.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException(expenseReqDTO.categoryId()));
 
@@ -131,6 +144,14 @@ public class ExpenseServiceImp implements ExpenseService {
         expense.setCategory(category);
 
         expenseRepository.save(expense);
+
+        log.atInfo()
+                .setMessage("Expense created successfully")
+                .addKeyValue("expenseId", expense.getId())
+                .addKeyValue("eventType", "EXPENSE_CREATED")
+                .addKeyValue("userId", userId)
+                .log();
+
         idempotencyRepository.markRecordCompleted(idempotencyKey, "COMPLETED");
         reportRepository.markReportStale(userId);
 
@@ -159,12 +180,18 @@ public class ExpenseServiceImp implements ExpenseService {
         expense.setDate(updatedTime);
         expense.setCategory(category);
 
-        Expense saved = expenseRepository.save(expense);
+        Expense savedExpense = expenseRepository.save(expense);
+        log.atInfo()
+                .setMessage("Expense updated successfully")
+                .addKeyValue("expenseId", savedExpense.getId())
+                .addKeyValue("eventType", "EXPENSE_UPDATED")
+                .addKeyValue("userId", userId)
+                .log();
 
         reportRepository.markReportStale(userId);
         auditPublisher.publishEvent(expense.getUser().getId(), UserActionsCategory.USER_UPDATED_EXPENSE, "USER", now());
 
-        return ExpenseMapper.mapToDTO(saved);
+        return ExpenseMapper.mapToDTO(savedExpense);
     }
 
 
@@ -180,6 +207,13 @@ public class ExpenseServiceImp implements ExpenseService {
         Expense expense = getExpenseEntity(id, userId);
 
         expenseRepository.deleteById(expense.getId());
+        log.atInfo()
+                .setMessage("Expense deleted successfully")
+                .addKeyValue("expenseId", expense.getId())
+                .addKeyValue("eventType", "EXPENSE_DELETED")
+                .addKeyValue("userId", userId)
+                .log();
+
         reportRepository.markReportStale(userId);
         auditPublisher.publishEvent(
                 expense.getUser().getId(),

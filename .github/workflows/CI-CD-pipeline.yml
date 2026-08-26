@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Copy monorepo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -139,6 +139,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Copy monorepo to deploy job's filesystem
+        uses: actions/checkout@v4
+
+      - name: Send the deployment files to S3 bucket
+        run: |
+          aws s3 cp docker-compose.yml \
+            s3://${{ secrets.DEPLOY_BUCKET }}/docker-compose.yml
+
+          aws s3 cp config.alloy \
+            s3://${{ secrets.DEPLOY_BUCKET }}/config.alloy
+
       - name: Deploy to EC2 using SSM
         run: |
           aws ssm send-command \
@@ -146,6 +157,8 @@ jobs:
           --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
           --parameters 'commands=[
             "cd /home/ubuntu/prod-app",
+            "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/docker-compose.yml ./docker-compose.yml",
+            "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/config.alloy ./config.alloy",
             "echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin",
             "/home/ubuntu/.docker/cli-plugins/docker-compose pull",
             "/home/ubuntu/.docker/cli-plugins/docker-compose down",

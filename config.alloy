@@ -1,0 +1,21 @@
+discovery.docker "expense_tracker" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "expense_tracker" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.docker.expense_tracker.targets
+
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+    basic_auth {
+      username = sys.env("LOKI_USERNAME")
+      password = sys.env("LOKI_PASSWORD")
+    }
+  }
+}

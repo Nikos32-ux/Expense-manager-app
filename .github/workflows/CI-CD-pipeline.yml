@@ -9,6 +9,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   changes:
     name: Detect changes via file checking
@@ -30,6 +32,7 @@ jobs:
              - 'backend/**'
             frontend:
              - 'frontend/**'
+
 
   backend-build:
     name: Backend CI
@@ -62,14 +65,14 @@ jobs:
         working-directory: ./backend
 
       - name: Login to Dockerhub
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Backend
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: docker/build-push-action@v6
         with:
           context: ./backend
@@ -102,14 +105,14 @@ jobs:
         working-directory: ./frontend
 
       - name: Login to Dockerhub
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Frontend
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
@@ -123,7 +126,7 @@ jobs:
     if: |
       always() &&
       github.ref == 'refs/heads/main' &&
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       needs.backend-build.result != 'failure' &&
       needs.frontend-build.result != 'failure'
     runs-on: ubuntu-latest

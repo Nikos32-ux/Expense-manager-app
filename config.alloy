@@ -2,9 +2,19 @@ discovery.docker "expense_tracker" {
   host = "unix:///var/run/docker.sock"
 }
 
+discovery.relabel "expense_tracker" {
+  targets = discovery.docker.expense_tracker.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
 loki.source.docker "expense_tracker" {
   host    = "unix:///var/run/docker.sock"
-  targets = discovery.docker.expense_tracker.targets
+  targets = discovery.relabel.expense_tracker.output
 
   forward_to = [loki.write.grafana_cloud.receiver]
 }

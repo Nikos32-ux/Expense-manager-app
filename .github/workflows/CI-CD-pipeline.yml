@@ -156,6 +156,7 @@ jobs:
           --document-name "AWS-RunShellScript" \
           --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
           --parameters 'commands=[
+            "set -e",
             "cd /home/ubuntu/prod-app",
             "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/docker-compose.yml ./docker-compose.yml",
             "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/config.alloy ./config.alloy",

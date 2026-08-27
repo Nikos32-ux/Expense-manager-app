@@ -176,30 +176,60 @@ SPRING_RABBITMQ_PASSWORD=guest</code></pre>
     </p>
 
     <h3>Docker</h3>
-
     <ul>
-        <li>Backend, frontend, PostgreSQL, and RabbitMQ run as Docker services</li>
-        <li><strong>Docker Compose</strong> manages the application stack</li>
-        <li>Frontend uses a <strong>multi-stage Docker build</strong></li>
-        <li>Frontend is served using an <strong>Alpine-based Nginx</strong> image</li>
+        <li>Backend, frontend, PostgreSQL, and RabbitMQ run as Docker services. Health checks are made before allowing container creation and we use named volumes to persist data generated from db and rabbit containers</li>
+        <li><strong>Docker Compose</strong> manages the application stack and defines a docker network</li>
+        <li>Frontend uses a <strong>multi-stage Docker build for creating the nginx final image which acts as reverse proxy and entry point of backend server and serves frontend files and proxy requests to springboot server.</strong></li>
     </ul>
 
     <h3>CI/CD</h3>
-
     <p>
-        Continuous integration and deployment are handled using
-        <strong>GitHub Actions</strong>.
+        Automated via Github Actions with path-filtering and conditionals to selectively run only affected components, backend or frontend.
     </p>
-
     <ul>
-        <li>Automated backend tests are executed as part of the CI pipeline of backend job runner</li>
-        <li>The backend application is built using JDK 21</li>
-        <li>Docker images are built and pushed to <strong>Docker Hub</strong></li>
-        <li>GitHub Action runners authenticate with AWS using <strong>OIDC</strong></li>
-        <li>Production deployment is triggered through <strong>AWS Systems Manager (SSM)</strong></li>
+        <li><strong>Filtering & Control:</strong> File-change detection job determine what is modified, and conditional statements (<code>if</code> checks) skip unchanged build jobs.</li>
+        <li><strong>Testing:</strong> Executes JUnit tests for the backend.</li>
+        <li><strong>Registry Push:</strong> Authenticates with Docker Hub and pushes updated images to production on every push to <code>main</code>.</li>
+        <li><strong>Secure Delivery:</strong> Uploads required deployment process files (<code>docker-compose.yml</code>, <code>config.alloy</code>) to an <strong>S3 bucket</strong> and triggers remote execution on EC2 via <strong>AWS Systems Manager (SSM)</strong>.</li>
     </ul>
 
-   <h2 id="running">Running the Application</h2>
+    <h3>AWS Infrastructure</h3>
+    <p>
+        AWS services are used to support the deployment process
+        and provide the required infrastructure.
+    </p>
+    <ul>
+        <li><strong>EC2:</strong> Hosts the production application and runs the Docker Compose stack.</li>
+        <li><strong>IAM:</strong> Provides separate roles and permissions for GitHub Actions and the EC2 instance.</li>
+        <li><strong>GitHub OIDC:</strong> Allows GitHub Actions to authenticate with AWS without storing long-lived AWS credentials.</li>
+        <li><strong>Systems Manager (SSM):</strong> GitHub Actions uses SSM to send deployment commands to the EC2 instance.</li>
+        <li><strong>S3:</strong> Provides storage used by the deployment infrastructure.</li>
+    </ul>
+
+    <p>
+        The GitHub Actions IAM role is configured with the permissions required
+        for the deployment workflow, while the EC2 instance uses its own IAM
+        role for the AWS resources required by the application and deployment
+        process.
+    </p>
+
+    <p><strong>Deployment flow:</strong></p>
+
+    <pre><code>GitHub Actions
+      ↓
+GitHub OIDC
+      ↓
+AWS IAM Role
+      ↓
+AWS Systems Manager (SSM)
+      ↓
+EC2 Instance
+      ↓
+Docker Compose
+      ↓
+Application Stack</code></pre>
+
+    <h2 id="running">Running the Application</h2>
 
 <h3>Option 1: Full Docker Setup (Local)</h3>
 

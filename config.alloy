@@ -29,3 +29,29 @@ loki.write "grafana_cloud" {
     }
   }
 }
+
+prometheus.scrape "expense_tracker_metrics" {
+  targets = [
+    { "__address__" = "expense-app:8080" },
+  ]
+
+  metrics_path = "/actuator/prometheus"
+
+  forward_to = [
+    prometheus.remote_write.metrics_hosted_prometheus.receiver
+  ]
+}
+
+prometheus.remote_write "metrics_hosted_prometheus" {
+   endpoint {
+      name = "hosted-prometheus"
+      url  = sys.env("PROM_URL")
+
+      basic_auth {
+        username = sys.env("PROM_USERNAME")
+        password = sys.env("PROM_PASSWORD")
+      }
+   }
+}
+
+

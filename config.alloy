@@ -37,9 +37,7 @@ prometheus.scrape "expense_tracker_metrics" {
 
   metrics_path = "/actuator/prometheus"
 
-  forward_to = [
-    prometheus.remote_write.metrics_hosted_prometheus.receiver
-  ]
+  forward_to = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
 }
 
 prometheus.remote_write "metrics_hosted_prometheus" {

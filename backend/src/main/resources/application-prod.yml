@@ -52,4 +52,10 @@ management:
         include: "health,metrics"
   endpoint:
     health:
-      show-details: never
+      show-details: always
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true

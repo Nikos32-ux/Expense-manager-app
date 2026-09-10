@@ -37,6 +37,12 @@
           http:
             server:
               requests: true
+    tracing:
+      sampling:
+        probability: 1.0
+    otlp:
+      tracing:
+        endpoint: http://alloy:4318/v1/traces
 
 
   rate-limiting:

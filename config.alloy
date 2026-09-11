@@ -80,46 +80,7 @@ otelcol.processor.batch "expense_batch" {
 
 otelcol.exporter.otlphttp "tempo_grafana" {
     client {
-        endpoint = env("GRAFANA_TEMPO_ENDPOINT")
-        auth     = otelcol.auth.basic.tempo_auth.handler
-    }
-}
-
-otelcol.auth.basic "tempo_auth" {
-    username = env("GRAFANA_TEMPO_USER")
-    password = env("GRAFANA_TEMPO_API_KEY")
-}
-
-
-otelcol.receiver.otlp "expense_traces" {
-    http {
-        endpoint = "0.0.0.0:4318"
-    }
-
-    output {
-        traces = [otelcol.processor.memory_limiter.memory_limit.input]
-    }
-}
-
-otelcol.processor.memory_limiter "memory_limit" {
-  check_interval  = "1s"
-  limit_mib       = 100
-  spike_limit_mib = 20
-
-  output {
-    traces = [otelcol.processor.batch.expense_batch.input]
-  }
-}
-
-otelcol.processor.batch "expense_batch" {
-    output {
-        traces = [otelcol.exporter.otlphttp.tempo_grafana.input]
-    }
-}
-
-otelcol.exporter.otlphttp "tempo_grafana" {
-    client {
-        endpoint = env("GRAFANA_TEMPO_ENDPOINT")
+        endpoint = sys.env("GRAFANA_TEMPO_ENDPOINT")
         auth     = otelcol.auth.basic.tempo_auth.handler
     }
 }

@@ -64,8 +64,8 @@ otelcol.receiver.otlp "expense_traces" {
 
 otelcol.processor.memory_limiter "memory_limit" {
   check_interval  = "1s"
-  limit_mib       = 100
-  spike_limit_mib = 20
+  limit       = "100MiB"
+  spike_limit = "20MiB"
 
   output {
     traces = [otelcol.processor.batch.expense_batch.input]

@@ -49,6 +49,13 @@ prometheus.remote_write "metrics_hosted_prometheus" {
         username = sys.env("PROM_USERNAME")
         password = sys.env("PROM_PASSWORD")
       }
+
+      queue_config {
+              max_samples_per_send = 500
+              max_shards           = 2
+              min_shards           = 1
+              capacity             = 5000
+            }
    }
 }
 

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record ExpensesFilters (
       @Pattern(
-              regexp = "(?i)^(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)$",
+              regexp = "^$|(?i)^(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)$",
               message = "{validation.filters.month.invalid}"
       )
       @Schema(

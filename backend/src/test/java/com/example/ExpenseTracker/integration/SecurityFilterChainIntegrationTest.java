@@ -61,7 +61,7 @@ public class SecurityFilterChainIntegrationTest {
     @Test
     void shouldDenyAccessToPrivateRoute_whenTokenDoesNotExist() throws Exception{
 
-        mockMvc.perform(get("/auth/get-expenses"))
+        mockMvc.perform(get("/expenses/get-expenses"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.message").exists())
